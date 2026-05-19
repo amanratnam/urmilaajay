@@ -1,0 +1,204 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;1,9..144,300;1,9..144,500&family=Inter+Tight:wght@400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: #12100E;
+  --bg-elevated: #1A1815;
+  --fg: #F2EDE4;
+  --fg-muted: #8A8278;
+  --accent: #C9A878;
+  --border: #2A2622;
+  --ease-memorial: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background-color: var(--bg);
+  color: var(--fg);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--fg);
+  font-family: 'Inter Tight', sans-serif;
+  font-size: 17px;
+  line-height: 1.7;
+  overflow-x: hidden;
+  cursor: none;
+}
+
+/* ─── Film grain overlay ─────────────────────────────────────────── */
+.grain-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0.04;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-size: 256px 256px;
+}
+
+/* ─── Vignette overlay ───────────────────────────────────────────── */
+.vignette-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse at center,
+    transparent 50%,
+    rgba(10, 8, 6, 0.15) 100%
+  );
+}
+
+/* ─── Custom cursor ──────────────────────────────────────────────── */
+.cursor-dot {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 8px;
+  height: 8px;
+  background: var(--fg);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 10000;
+  transform: translate(-50%, -50%);
+  transition: width 300ms var(--ease-memorial),
+              height 300ms var(--ease-memorial),
+              background 300ms var(--ease-memorial),
+              border-radius 300ms var(--ease-memorial);
+  mix-blend-mode: difference;
+}
+
+.cursor-dot.cursor-hover {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--fg);
+}
+
+.cursor-label {
+  position: fixed;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  z-index: 10001;
+  transform: translate(-50%, -50%);
+  font-family: 'Inter Tight', sans-serif;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--bg);
+  opacity: 0;
+  transition: opacity 300ms var(--ease-memorial);
+  mix-blend-mode: normal;
+}
+
+.cursor-label.cursor-hover {
+  opacity: 1;
+}
+
+/* ─── Selection ──────────────────────────────────────────────────── */
+::selection {
+  background: var(--accent);
+  color: var(--bg);
+}
+
+/* ─── Scrollbar ──────────────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 3px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 2px;
+}
+
+/* ─── Typography utilities ───────────────────────────────────────── */
+.serif {
+  font-family: 'Fraunces', Georgia, serif;
+}
+
+.hero-title {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: clamp(96px, 14vw, 240px);
+  font-weight: 300;
+  letter-spacing: -0.02em;
+  line-height: 0.9;
+  color: var(--fg);
+}
+
+.hero-subtitle {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: clamp(40px, 6vw, 96px);
+  font-weight: 300;
+  color: var(--fg-muted);
+  letter-spacing: -0.01em;
+}
+
+.hero-dates {
+  font-family: 'Inter Tight', sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--fg-muted);
+}
+
+.section-header {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: 48px;
+  font-weight: 500;
+  color: var(--fg);
+}
+
+.caption-serif {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: 18px;
+  font-weight: 300;
+  font-style: italic;
+  line-height: 1.6;
+  color: var(--fg);
+}
+
+.tile-caption {
+  font-family: 'Inter Tight', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--fg);
+}
+
+/* ─── Tile entrance animation ────────────────────────────────────── */
+@keyframes tileIn {
+  from { opacity: 0; transform: translateY(28px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.tile-visible {
+  animation: tileIn 1.1s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* ─── Reduced motion ─────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
