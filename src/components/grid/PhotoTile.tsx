@@ -51,6 +51,8 @@ export function PhotoTile({ photo, index, fullWidth = false }: PhotoTileProps) {
           fill
           loading={index < 6 ? "eager" : "lazy"}
           sizes={fullWidth ? "100vw" : "(max-width: 768px) 100vw, 50vw"}
+          placeholder={photo.blurDataURL ? "blur" : "empty"}
+          blurDataURL={photo.blurDataURL}
           style={{ objectFit: "cover", filter: "brightness(1.08) saturate(1.05)" }}
         />
       </motion.div>

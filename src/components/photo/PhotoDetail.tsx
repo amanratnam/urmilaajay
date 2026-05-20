@@ -39,17 +39,22 @@ export function PhotoDetail({ photo, prev, next }: Props) {
     return () => window.removeEventListener("keydown", onKey);
   }, [prev, next, router]);
 
-  // Polaroid 3D tilt
+  // Polaroid 3D tilt — shadow shifts opposite to tilt direction for realism
   const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     const el = tiltRef.current;
     if (!el) return;
     const rect = el.getBoundingClientRect();
-    const x = (e.clientX - rect.left) / rect.width - 0.5;
+    const x = (e.clientX - rect.left) / rect.width - 0.5;  // –0.5 → 0.5
     const y = (e.clientY - rect.top) / rect.height - 0.5;
-    const rotY = x * 14;
-    const rotX = -y * 10;
-    const shine = `radial-gradient(circle at ${e.clientX - rect.left}px ${e.clientY - rect.top}px, rgba(255,255,255,0.10) 0%, transparent 60%)`;
+    const rotY = x * 16;
+    const rotX = -y * 12;
+    // Shadow offset opposes tilt: tilting right → shadow goes left
+    const shadowX = -x * 24;
+    const shadowY = -y * 16;
+    const shadowBlur = 40 + Math.abs(x * 20) + Math.abs(y * 20);
+    const shine = `radial-gradient(circle at ${e.clientX - rect.left}px ${e.clientY - rect.top}px, rgba(255,255,255,0.12) 0%, transparent 55%)`;
     el.style.transform = `perspective(900px) rotateY(${rotY}deg) rotateX(${rotX}deg) scale(1.02)`;
+    el.style.boxShadow = `${shadowX}px ${shadowY}px ${shadowBlur}px rgba(0,0,0,0.55)`;
     el.style.setProperty("--shine", shine);
   }, []);
 
@@ -57,6 +62,7 @@ export function PhotoDetail({ photo, prev, next }: Props) {
     const el = tiltRef.current;
     if (!el) return;
     el.style.transform = "perspective(900px) rotateY(0deg) rotateX(0deg) scale(1)";
+    el.style.boxShadow = "0px 20px 60px rgba(0,0,0,0.4)";
     el.style.setProperty("--shine", "none");
   }, []);
 
@@ -148,8 +154,9 @@ export function PhotoDetail({ photo, prev, next }: Props) {
             maxWidth: isPortrait ? "min(420px, 52vh)" : "min(820px, 76vw)",
             width: "100%",
             cursor: "none",
-            transition: "transform 0.18s cubic-bezier(0.22, 1, 0.36, 1)",
+            transition: "transform 0.22s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.22s cubic-bezier(0.22, 1, 0.36, 1)",
             transformStyle: "preserve-3d",
+            boxShadow: "0px 20px 60px rgba(0,0,0,0.4)",
           }}
         >
           <motion.div
@@ -169,6 +176,8 @@ export function PhotoDetail({ photo, prev, next }: Props) {
               fill
               priority
               sizes="(max-width: 768px) 100vw, 80vw"
+              placeholder={photo.blurDataURL ? "blur" : "empty"}
+              blurDataURL={photo.blurDataURL}
               style={{
                 objectFit: "cover",
                 filter: "brightness(1.06) saturate(1.04)",

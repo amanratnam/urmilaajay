@@ -72,6 +72,22 @@ export function HeroSection() {
     if (Math.abs(delta) > 40) go(delta > 0 ? 1 : -1);
   };
 
+  // Title 3D tilt — cursor drives perspective rotation on the names block
+  const titleRef = useRef<HTMLDivElement>(null);
+  const onMouseMove = useCallback((e: React.MouseEvent<HTMLElement>) => {
+    const el = titleRef.current;
+    if (!el) return;
+    const { left, top, width, height } = heroRef.current!.getBoundingClientRect();
+    const x = (e.clientX - left) / width - 0.5;   // –0.5 → 0.5
+    const y = (e.clientY - top) / height - 0.5;
+    el.style.transform = `perspective(900px) rotateY(${x * 10}deg) rotateX(${-y * 7}deg)`;
+  }, []);
+  const onMouseLeave = useCallback(() => {
+    const el = titleRef.current;
+    if (!el) return;
+    el.style.transform = "perspective(900px) rotateY(0deg) rotateX(0deg)";
+  }, []);
+
   const filmVariants = {
     enter: (d: number) => ({ y: d > 0 ? "100%" : "-100%" }),
     center: { y: "0%" },
@@ -85,6 +101,8 @@ export function HeroSection() {
       ref={heroRef}
       onTouchStart={onTouchStart}
       onTouchEnd={onTouchEnd}
+      onMouseMove={onMouseMove}
+      onMouseLeave={onMouseLeave}
       style={{
         position: "relative",
         height: "100svh",
@@ -138,7 +156,7 @@ export function HeroSection() {
         }}
       />
 
-      {/* ── Title — fixed in center ───────────────────────────────────── */}
+      {/* ── Title — fixed in center, 3D tilt follows cursor ─────────── */}
       <div
         style={{
           position: "absolute",
@@ -152,6 +170,14 @@ export function HeroSection() {
           pointerEvents: "none",
         }}
       >
+        {/* tiltRef wrapper: transition provides the spring-back ease */}
+        <div
+          ref={titleRef}
+          style={{
+            transformStyle: "preserve-3d",
+            transition: "transform 0.65s cubic-bezier(0.22, 1, 0.36, 1)",
+          }}
+        >
         <motion.h1
           className="hero-title"
           initial={{ opacity: 0, y: 32 }}
@@ -180,6 +206,7 @@ export function HeroSection() {
         >
           1980 – 2018 &nbsp;·&nbsp; 1971 – 2021
         </motion.p>
+        </div>
       </div>
 
       {/* ── Bottom-left: subject label (changes per photo) ───────────── */}
