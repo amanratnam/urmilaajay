@@ -59,11 +59,23 @@ export function CustomCursor() {
     document.addEventListener("mouseover", onEnter);
     document.addEventListener("mouseout", onLeave);
 
+    // Block right-click / long-press save on images site-wide
+    const onContextMenu = (e: MouseEvent) => {
+      if ((e.target as HTMLElement)?.tagName === "IMG") e.preventDefault();
+    };
+    const onDragStart = (e: DragEvent) => {
+      if ((e.target as HTMLElement)?.tagName === "IMG") e.preventDefault();
+    };
+    document.addEventListener("contextmenu", onContextMenu);
+    document.addEventListener("dragstart", onDragStart);
+
     return () => {
       cancelAnimationFrame(raf);
       window.removeEventListener("mousemove", onMove);
       document.removeEventListener("mouseover", onEnter);
       document.removeEventListener("mouseout", onLeave);
+      document.removeEventListener("contextmenu", onContextMenu);
+      document.removeEventListener("dragstart", onDragStart);
     };
   }, []);
 

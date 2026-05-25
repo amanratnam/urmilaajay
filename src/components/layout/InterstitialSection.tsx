@@ -5,11 +5,15 @@ import { motion, useScroll, useTransform } from "framer-motion";
 import Image from "next/image";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { interstitialPhoto } from "@/lib/photos";
+import { Photo } from "@/types";
 
 gsap.registerPlugin(ScrollTrigger);
 
-export function InterstitialSection() {
+interface Props {
+  photo: Photo;
+}
+
+export function InterstitialSection({ photo }: Props) {
   const sectionRef = useRef<HTMLElement>(null);
   const quoteRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
@@ -56,12 +60,15 @@ export function InterstitialSection() {
         }}
       >
         <Image
-          src={interstitialPhoto.src}
+          src={photo.src}
           alt="Urmila"
           fill
           loading="lazy"
           sizes="100vw"
-          style={{ objectFit: "cover", opacity: 0.45 }}
+          draggable={false}
+          placeholder={photo.blurDataURL ? "blur" : "empty"}
+          blurDataURL={photo.blurDataURL}
+          style={{ objectFit: "cover", opacity: 0.45, pointerEvents: "none", userSelect: "none" }}
         />
         <div
           style={{

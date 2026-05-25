@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
+import { AdminPhotos } from "@/components/admin/AdminPhotos";
 
 interface PendingComment {
   id: string;
@@ -14,10 +15,13 @@ interface PendingComment {
 
 const ease = [0.22, 1, 0.36, 1] as const;
 
+type Tab = "memories" | "photos";
+
 export default function AdminPage() {
   const [password, setPassword] = useState("");
   const [authed, setAuthed] = useState(false);
   const [authError, setAuthError] = useState("");
+  const [tab, setTab] = useState<Tab>("memories");
   const [comments, setComments] = useState<PendingComment[]>([]);
   const [loading, setLoading] = useState(false);
   const [acting, setActing] = useState<string | null>(null);
@@ -246,6 +250,34 @@ export default function AdminPage() {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.6, ease }}
             >
+              {/* Tab switcher */}
+              <div style={{ display: "flex", gap: 24, marginBottom: 48, borderBottom: "1px solid var(--border)", paddingBottom: 16 }}>
+                {(["memories", "photos"] as Tab[]).map((t) => (
+                  <button
+                    key={t}
+                    onClick={() => setTab(t)}
+                    style={{
+                      background: "none",
+                      border: "none",
+                      fontFamily: "Inter Tight, sans-serif",
+                      fontSize: 11,
+                      fontWeight: 500,
+                      letterSpacing: "0.12em",
+                      textTransform: "uppercase",
+                      color: tab === t ? "var(--fg)" : "var(--fg-muted)",
+                      cursor: "pointer",
+                      padding: 0,
+                    }}
+                  >
+                    {t}
+                  </button>
+                ))}
+              </div>
+
+              {tab === "photos" && <AdminPhotos />}
+
+              {tab === "memories" && (
+              <>
               <div
                 style={{
                   display: "flex",
@@ -460,6 +492,8 @@ export default function AdminPage() {
               >
                 ↻ Refresh
               </button>
+              </>
+              )}
             </motion.div>
           )}
         </AnimatePresence>

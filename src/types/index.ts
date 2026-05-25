@@ -1,18 +1,16 @@
 export type PhotoSubject = "urmila" | "ajay" | "both" | "family";
 
 export interface Photo {
-  id: string;
-  slug: string;
-  filename: string;
-  src: string;
+  id: string;            // uuid (also used as the URL slug)
+  slug: string;          // == id, kept for route compatibility
+  storagePath: string;   // path within the private `photos` bucket
+  src: string;           // short-lived signed URL
   caption: string;
   year: number;
-  date?: string;
   subject: PhotoSubject;
   aspectRatio: number;
+  sortOrder: number;
   blurDataURL?: string;
-  colSpan?: 1 | 2;
-  rowSpan?: 1 | 2;
 }
 
 export interface Comment {

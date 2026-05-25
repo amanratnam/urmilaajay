@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getSupabaseAdmin } from "@/lib/supabase/admin";
 
 const RATE_LIMIT_WINDOW = 60_000; // 1 minute
 const RATE_LIMIT_MAX = 3;
@@ -16,10 +17,36 @@ function isRateLimited(ip: string): boolean {
   return timestamps.length > RATE_LIMIT_MAX;
 }
 
+// GET approved comments for a photo: /api/comments?photo_id=<uuid>
+export async function GET(req: NextRequest) {
+  const photoId = req.nextUrl.searchParams.get("photo_id");
+  if (!photoId) {
+    return NextResponse.json({ error: "Missing photo_id." }, { status: 400 });
+  }
+
+  const supabase = getSupabaseAdmin();
+  if (!supabase) return NextResponse.json({ comments: [] });
+
+  const { data, error } = await supabase
+    .from("comments")
+    .select("id, author_name, body, created_at")
+    .eq("photo_id", photoId)
+    .eq("approved", true)
+    .order("created_at", { ascending: true });
+
+  if (error) {
+    return NextResponse.json({ error: "Failed to load comments." }, { status: 500 });
+  }
+  return NextResponse.json({ comments: data ?? [] });
+}
+
 export async function POST(req: NextRequest) {
   const ip = getIp(req);
   if (isRateLimited(ip)) {
-    return NextResponse.json({ error: "Too many submissions. Please try again shortly." }, { status: 429 });
+    return NextResponse.json(
+      { error: "Too many submissions. Please try again shortly." },
+      { status: 429 }
+    );
   }
 
   let body: unknown;
@@ -47,18 +74,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Memory too long." }, { status: 400 });
   }
 
-  // Supabase integration — gracefully no-ops if env vars aren't configured
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-  if (
-    supabaseUrl &&
-    serviceKey &&
-    !supabaseUrl.includes("placeholder") &&
-    !serviceKey.includes("placeholder")
-  ) {
-    const { createClient } = await import("@supabase/supabase-js");
-    const supabase = createClient(supabaseUrl, serviceKey);
+  const supabase = getSupabaseAdmin();
+  if (supabase) {
     const { error } = await supabase.from("comments").insert({
       photo_id,
       author_name: author_name.trim().slice(0, 80),

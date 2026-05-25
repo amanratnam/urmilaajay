@@ -7,8 +7,8 @@ interface Props {
   params: { slug: string };
 }
 
-export function generateMetadata({ params }: Props): Metadata {
-  const photo = getPhotoBySlug(params.slug);
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const photo = await getPhotoBySlug(params.slug);
   if (!photo) return {};
 
   const subject =
@@ -45,11 +45,11 @@ export function generateMetadata({ params }: Props): Metadata {
   };
 }
 
-export default function PhotoPage({ params }: Props) {
-  const photo = getPhotoBySlug(params.slug);
+export default async function PhotoPage({ params }: Props) {
+  const photo = await getPhotoBySlug(params.slug);
   if (!photo) notFound();
 
-  const { prev, next } = getAdjacentPhotos(params.slug);
+  const { prev, next } = await getAdjacentPhotos(params.slug);
 
   return <PhotoDetail photo={photo} prev={prev} next={next} />;
 }

@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "import-photos": "tsx scripts/import-photos.ts"
+    "migrate-photos": "tsx scripts/migrate-to-supabase.ts"
   },
   "dependencies": {
     "@react-three/drei": "^9.122.0",
@@ -20,6 +20,7 @@
     "plaiceholder": "^3.0.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "server-only": "^0.0.1",
     "sharp": "^0.33.5",
     "three": "^0.169.0"
   },
@@ -29,6 +30,7 @@
     "@types/react-dom": "^18.3.7",
     "@types/three": "^0.169.0",
     "autoprefixer": "^10.4.21",
+    "dotenv": "^17.4.2",
     "eslint": "^8.57.1",
     "eslint-config-next": "^14.2.29",
     "exifr": "^7.1.3",

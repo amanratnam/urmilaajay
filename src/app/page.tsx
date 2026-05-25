@@ -2,24 +2,29 @@ import { SmoothScrollProvider } from "@/components/layout/SmoothScrollProvider";
 import { Nav } from "@/components/layout/Nav";
 import { HeroSection } from "@/components/layout/HeroSection";
 import { IntroSection } from "@/components/layout/IntroSection";
-import { ArchiveGrid } from "@/components/grid/ArchiveGrid";
+import { GalleryCarousel } from "@/components/gallery/GalleryCarousel";
 import { InterstitialSection } from "@/components/layout/InterstitialSection";
 import { FooterSection } from "@/components/layout/FooterSection";
-import { photos } from "@/lib/photos";
+import { getPhotos } from "@/lib/photos";
 
-const firstHalf = photos.slice(0, 28);
-const secondHalf = photos.slice(28);
+export const revalidate = 3600;
 
-export default function Home() {
+export default async function Home() {
+  const photos = await getPhotos();
+  const heroPhotos = photos.slice(0, 10);
+  const interstitial =
+    photos.find((p) => p.subject === "urmila" && p.aspectRatio > 1) ??
+    photos[0] ??
+    null;
+
   return (
     <SmoothScrollProvider>
       <Nav />
       <main>
-        <HeroSection />
+        <HeroSection photos={heroPhotos} />
         <IntroSection />
-        <ArchiveGrid photos={firstHalf} id="archive" />
-        <InterstitialSection />
-        <ArchiveGrid photos={secondHalf} />
+        <GalleryCarousel photos={photos} id="gallery" />
+        {interstitial && <InterstitialSection photo={interstitial} />}
       </main>
       <FooterSection />
     </SmoothScrollProvider>
