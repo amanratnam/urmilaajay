@@ -1,10 +1,12 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useRef, useCallback } from "react";
+import { motion, useScroll, useTransform } from "framer-motion";
 import Image from "next/image";
 import dynamic from "next/dynamic";
 import { Photo } from "@/types";
+import { FloatingWords } from "./FloatingWords";
+import { useIsMobile } from "@/hooks/useMediaQuery";
 
 const HeroParticles = dynamic(
   () => import("@/components/three/HeroParticles").then((m) => m.HeroParticles),
@@ -13,209 +15,135 @@ const HeroParticles = dynamic(
 
 const ease = [0.22, 1, 0.36, 1] as const;
 
-function subjectLabel(s: string) {
-  if (s === "both") return "Urmila & Ajay";
-  if (s === "family") return "Family";
-  if (s === "ajay") return "Ajay";
-  return "Urmila";
-}
+const MESSAGE =
+  "Welcome to a memorial space for Urmila and Ajay. We (their kids) have created this website to allow them to live on the internet and for any of the loved ones to access the memories they had with them, and add their own. We loved you while you were on Earth, we love you while you're in heaven, and we hope you're happier than you ever were. Miss you mom and dad.";
 
 interface Props {
-  photos: Photo[];
+  photo: Photo | null;
 }
 
-export function HeroSection({ photos }: Props) {
-  const heroPhotos = photos.length > 0 ? photos : [];
-  const [index, setIndex] = useState(0);
-  const [direction, setDirection] = useState<1 | -1>(1);
-  const lockedRef = useRef(false);
-  const heroRef = useRef<HTMLElement>(null);
-
-  const count = heroPhotos.length;
-
-  const go = useCallback(
-    (dir: 1 | -1) => {
-      if (lockedRef.current || count === 0) return;
-      const next = index + dir;
-      if (next < 0 || next >= count) return;
-      lockedRef.current = true;
-      setDirection(dir);
-      setIndex(next);
-      setTimeout(() => {
-        lockedRef.current = false;
-      }, 1000);
-    },
-    [index, count]
-  );
-
-  useEffect(() => {
-    const el = heroRef.current;
-    if (!el) return;
-    const onWheel = (e: WheelEvent) => {
-      const atEnd = e.deltaY > 0 && index === count - 1;
-      const atStart = e.deltaY < 0 && index === 0;
-      if (atEnd || atStart) return;
-      e.preventDefault();
-      go(e.deltaY > 0 ? 1 : -1);
-    };
-    el.addEventListener("wheel", onWheel, { passive: false });
-    return () => el.removeEventListener("wheel", onWheel);
-  }, [index, count, go]);
-
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "ArrowDown") go(1);
-      if (e.key === "ArrowUp") go(-1);
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [go]);
-
-  const touchStartY = useRef(0);
-  const onTouchStart = (e: React.TouchEvent) => {
-    touchStartY.current = e.touches[0].clientY;
-  };
-  const onTouchEnd = (e: React.TouchEvent) => {
-    const delta = touchStartY.current - e.changedTouches[0].clientY;
-    if (Math.abs(delta) > 40) go(delta > 0 ? 1 : -1);
-  };
-
-  // Title 3D tilt — cursor drives perspective rotation
+export function HeroSection({ photo }: Props) {
+  const isMobile = useIsMobile();
+  const ref = useRef<HTMLElement>(null);
   const titleRef = useRef<HTMLDivElement>(null);
-  const onMouseMove = useCallback((e: React.MouseEvent<HTMLElement>) => {
-    const el = titleRef.current;
-    if (!el || !heroRef.current) return;
-    const { left, top, width, height } = heroRef.current.getBoundingClientRect();
-    const x = (e.clientX - left) / width - 0.5;
-    const y = (e.clientY - top) / height - 0.5;
-    el.style.transform = `perspective(900px) rotateY(${x * 10}deg) rotateX(${-y * 7}deg)`;
-  }, []);
+
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start start", "end start"],
+  });
+  // Photo drifts up as you scroll away (parallax)
+  const photoY = useTransform(scrollYProgress, [0, 1], ["0%", "28%"]);
+  const contentOpacity = useTransform(scrollYProgress, [0, 0.7], [1, 0]);
+
+  // Cursor tilt on the title block (desktop only)
+  const onMouseMove = useCallback(
+    (e: React.MouseEvent<HTMLElement>) => {
+      if (isMobile) return;
+      const el = titleRef.current;
+      if (!el || !ref.current) return;
+      const { left, top, width, height } = ref.current.getBoundingClientRect();
+      const x = (e.clientX - left) / width - 0.5;
+      const y = (e.clientY - top) / height - 0.5;
+      el.style.transform = `perspective(1000px) rotateY(${x * 7}deg) rotateX(${-y * 5}deg)`;
+    },
+    [isMobile]
+  );
   const onMouseLeave = useCallback(() => {
     const el = titleRef.current;
-    if (el) el.style.transform = "perspective(900px) rotateY(0deg) rotateX(0deg)";
+    if (el) el.style.transform = "perspective(1000px) rotateY(0deg) rotateX(0deg)";
   }, []);
 
-  const filmVariants = {
-    enter: (d: number) => ({ y: d > 0 ? "100%" : "-100%", scale: 1.08 }),
-    center: { y: "0%", scale: 1 },
-    exit: (d: number) => ({ y: d > 0 ? "-100%" : "100%", scale: 1.08 }),
-  };
-
-  const isLast = count === 0 || index === count - 1;
-  const current = heroPhotos[index];
+  const titleSize = isMobile ? "clamp(64px, 19vw, 96px)" : "clamp(96px, 12vw, 200px)";
+  const yearSize = isMobile ? 13 : 18;
 
   return (
     <section
-      ref={heroRef}
-      onTouchStart={onTouchStart}
-      onTouchEnd={onTouchEnd}
+      ref={ref}
       onMouseMove={onMouseMove}
       onMouseLeave={onMouseLeave}
       onContextMenu={(e) => e.preventDefault()}
       style={{
         position: "relative",
-        height: "100svh",
+        minHeight: "100svh",
         overflow: "hidden",
         background: "var(--bg)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: isMobile ? "100px 24px 80px" : "120px 48px",
       }}
     >
-      {/* ── Filmstrip photo ─────────────────────────────────────────── */}
-      {current && (
-        <AnimatePresence custom={direction} initial={false}>
+      {/* ── Static photo of Urmila — animated (Ken Burns + parallax) ── */}
+      {photo && (
+        <motion.div style={{ position: "absolute", inset: "-8% 0", y: photoY, zIndex: 0 }}>
           <motion.div
-            key={index}
-            custom={direction}
-            variants={filmVariants}
-            initial="enter"
-            animate="center"
-            exit="exit"
-            transition={{ duration: 1.0, ease }}
             style={{ position: "absolute", inset: 0 }}
+            initial={{ scale: 1.05 }}
+            animate={{ scale: 1.16 }}
+            transition={{ duration: 18, ease: "easeOut", repeat: Infinity, repeatType: "reverse" }}
           >
-            {/* Slow Ken Burns drift on the active photo */}
-            <motion.div
-              style={{ position: "absolute", inset: 0 }}
-              initial={{ scale: 1.0 }}
-              animate={{ scale: 1.08 }}
-              transition={{ duration: 8, ease: "easeOut" }}
-            >
-              <Image
-                src={current.src}
-                alt={current.caption || `Urmila — ${current.year}`}
-                fill
-                priority={index < 2}
-                sizes="100vw"
-                draggable={false}
-                style={{
-                  objectFit: "cover",
-                  filter: "brightness(0.46) saturate(1.08)",
-                  pointerEvents: "none",
-                  userSelect: "none",
-                }}
-              />
-            </motion.div>
-            <div
+            <Image
+              src={photo.src}
+              alt="Urmila"
+              fill
+              priority
+              sizes="100vw"
+              draggable={false}
+              placeholder={photo.blurDataURL ? "blur" : "empty"}
+              blurDataURL={photo.blurDataURL}
               style={{
-                position: "absolute",
-                inset: 0,
-                background:
-                  "linear-gradient(to bottom, rgba(18,16,14,0.2) 0%, transparent 32%, rgba(18,16,14,0.6) 100%)",
+                objectFit: "cover",
+                objectPosition: "center 30%",
+                filter: "brightness(0.4) saturate(1.05)",
+                pointerEvents: "none",
               }}
             />
           </motion.div>
-        </AnimatePresence>
+          <div
+            style={{
+              position: "absolute",
+              inset: 0,
+              background:
+                "linear-gradient(to bottom, rgba(18,16,14,0.55) 0%, rgba(18,16,14,0.35) 45%, rgba(18,16,14,0.75) 100%)",
+            }}
+          />
+        </motion.div>
       )}
 
-      {/* ── Ethereal floating motes (3D) ────────────────────────────── */}
+      {/* ── Ethereal motes + floating 3D words ──────────────────────── */}
       <HeroParticles />
+      {!isMobile && <FloatingWords />}
 
-      {/* ── Gold light bloom behind the title ───────────────────────── */}
+      {/* ── Gold light bloom ────────────────────────────────────────── */}
       <motion.div
         aria-hidden
-        initial={{ opacity: 0, scale: 0.8 }}
+        initial={{ opacity: 0, scale: 0.85 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 2.4, ease }}
         style={{
           position: "absolute",
-          top: "42%",
+          top: "40%",
           left: "50%",
-          width: "70vw",
-          height: "70vw",
-          maxWidth: 900,
-          maxHeight: 900,
+          width: "80vw",
+          height: "80vw",
+          maxWidth: 1000,
+          maxHeight: 1000,
           transform: "translate(-50%, -50%)",
           background:
             "radial-gradient(circle, rgba(201,168,120,0.10) 0%, rgba(201,168,120,0.04) 35%, transparent 65%)",
-          zIndex: 7,
+          zIndex: 5,
           pointerEvents: "none",
         }}
       />
 
-      {/* ── Top/bottom edge fades ───────────────────────────────────── */}
-      <div
-        aria-hidden
+      {/* ── Content ─────────────────────────────────────────────────── */}
+      <motion.div
         style={{
-          position: "absolute",
-          inset: 0,
-          background:
-            "linear-gradient(to bottom, var(--bg) 0%, transparent 12%, transparent 88%, var(--bg) 100%)",
-          pointerEvents: "none",
-          zIndex: 8,
-        }}
-      />
-
-      {/* ── Title ───────────────────────────────────────────────────── */}
-      <div
-        style={{
-          position: "absolute",
-          inset: 0,
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
+          position: "relative",
           zIndex: 10,
           textAlign: "center",
-          pointerEvents: "none",
+          maxWidth: 720,
+          opacity: contentOpacity,
         }}
       >
         <div
@@ -223,176 +151,127 @@ export function HeroSection({ photos }: Props) {
           style={{
             transformStyle: "preserve-3d",
             transition: "transform 0.65s cubic-bezier(0.22, 1, 0.36, 1)",
+            marginBottom: isMobile ? 28 : 36,
           }}
         >
-          <motion.h1
-            className="hero-title"
-            initial={{ opacity: 0, y: 40, filter: "blur(12px)" }}
-            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-            transition={{ duration: 1.6, delay: 0.3, ease }}
-            style={{ display: "block", marginBottom: 8 }}
-          >
-            Urmila
-          </motion.h1>
-
-          <motion.p
-            className="hero-subtitle"
-            initial={{ opacity: 0, y: 28, filter: "blur(10px)" }}
-            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-            transition={{ duration: 1.6, delay: 0.6, ease }}
-            style={{ display: "block", marginBottom: 40 }}
-          >
-            & Ajay
-          </motion.p>
-
-          <motion.div
-            initial={{ opacity: 0, scaleX: 0 }}
-            animate={{ opacity: 1, scaleX: 1 }}
-            transition={{ duration: 1.2, delay: 1.0, ease }}
+          {/* Urmila + years */}
+          <div
+            className="hero-reveal"
             style={{
-              width: 60,
-              height: 1,
-              background: "var(--accent)",
-              margin: "0 auto 24px",
-              transformOrigin: "center",
+              animationDelay: "0.3s",
+              display: "flex",
+              flexDirection: isMobile ? "column" : "row",
+              alignItems: isMobile ? "center" : "baseline",
+              justifyContent: "center",
+              gap: isMobile ? 4 : 16,
             }}
-          />
-
-          <motion.p
-            className="hero-dates"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 1.4, delay: 1.2, ease }}
           >
-            1980 – 2018 &nbsp;·&nbsp; 1971 – 2021
-          </motion.p>
-        </div>
-      </div>
+            <span className="hero-title" style={{ fontSize: titleSize, lineHeight: 0.95 }}>
+              Urmila
+            </span>
+            <span style={yearStyle(yearSize)}>1980 – 2018</span>
+          </div>
 
-      {/* ── Subject label ───────────────────────────────────────────── */}
-      {current && (
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={`label-${index}`}
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.5, ease }}
-            style={{ position: "absolute", left: 40, bottom: 48, zIndex: 20 }}
+          {/* & Ajay + years */}
+          <div
+            className="hero-reveal"
+            style={{
+              animationDelay: "0.55s",
+              display: "flex",
+              flexDirection: isMobile ? "column" : "row",
+              alignItems: isMobile ? "center" : "baseline",
+              justifyContent: "center",
+              gap: isMobile ? 4 : 16,
+              marginTop: isMobile ? 12 : 4,
+            }}
           >
             <span
-              style={{
-                fontFamily: "Inter Tight, sans-serif",
-                fontSize: 10,
-                fontWeight: 500,
-                letterSpacing: "0.14em",
-                textTransform: "uppercase",
-                color: "var(--fg-muted)",
-              }}
+              className="hero-subtitle"
+              style={{ fontSize: isMobile ? "clamp(36px, 12vw, 60px)" : "clamp(48px, 7vw, 110px)", lineHeight: 0.95 }}
             >
-              {subjectLabel(current.subject)}
+              &amp; Ajay
             </span>
-          </motion.div>
-        </AnimatePresence>
-      )}
+            <span style={yearStyle(yearSize)}>1971 – 2021</span>
+          </div>
+        </div>
 
-      {/* ── Counter ─────────────────────────────────────────────────── */}
-      {count > 0 && (
+        {/* Accent rule */}
         <div
+          className="hero-rule-in"
           style={{
-            position: "absolute",
-            right: 40,
-            bottom: 48,
-            zIndex: 20,
+            animationDelay: "0.9s",
+            width: 60,
+            height: 1,
+            background: "var(--accent)",
+            margin: "0 auto 28px",
+          }}
+        />
+
+        {/* Memorial message */}
+        <p
+          className="hero-reveal"
+          style={{
+            animationDelay: "1.1s",
+            fontFamily: "Fraunces, Georgia, serif",
+            fontWeight: 300,
+            fontStyle: "italic",
+            fontSize: isMobile ? 15 : 18,
+            lineHeight: 1.7,
+            color: "var(--fg)",
+            maxWidth: 620,
+            margin: "0 auto",
+            textShadow: "0 1px 20px rgba(0,0,0,0.6)",
+          }}
+        >
+          {MESSAGE}
+        </p>
+      </motion.div>
+
+      {/* ── Scroll cue ──────────────────────────────────────────────── */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 1, delay: 1.8 }}
+        style={{
+          position: "absolute",
+          bottom: isMobile ? 28 : 40,
+          left: "50%",
+          transform: "translateX(-50%)",
+          zIndex: 20,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: 10,
+        }}
+      >
+        <span
+          style={{
             fontFamily: "Inter Tight, sans-serif",
             fontSize: 10,
-            letterSpacing: "0.1em",
+            letterSpacing: "0.14em",
+            textTransform: "uppercase",
             color: "var(--fg-muted)",
           }}
         >
-          <motion.span
-            key={`count-${index}`}
-            initial={{ opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, ease }}
-            style={{ display: "inline-block" }}
-          >
-            {String(index + 1).padStart(2, "0")}
-          </motion.span>
-          <span style={{ opacity: 0.35 }}> / {String(count).padStart(2, "0")}</span>
-        </div>
-      )}
-
-      {/* ── Progress ticks ──────────────────────────────────────────── */}
-      {count > 0 && (
-        <div
-          style={{
-            position: "absolute",
-            right: 40,
-            top: "50%",
-            transform: "translateY(-50%)",
-            zIndex: 20,
-            display: "flex",
-            flexDirection: "column",
-            gap: 5,
-            alignItems: "center",
-          }}
-        >
-          {heroPhotos.map((_, i) => (
-            <div
-              key={i}
-              style={{
-                width: 2,
-                height: i === index ? 22 : 5,
-                background: i === index ? "var(--fg)" : "var(--border)",
-                transition: "height 0.4s cubic-bezier(0.22,1,0.36,1), background 0.4s",
-                borderRadius: 1,
-              }}
-            />
-          ))}
-        </div>
-      )}
-
-      {/* ── Scroll cue ──────────────────────────────────────────────── */}
-      <AnimatePresence>
-        {isLast && (
-          <motion.div
-            key="scroll-cue"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.6, ease }}
-            style={{
-              position: "absolute",
-              bottom: 48,
-              left: "50%",
-              transform: "translateX(-50%)",
-              zIndex: 20,
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              gap: 10,
-            }}
-          >
-            <span
-              style={{
-                fontFamily: "Inter Tight, sans-serif",
-                fontSize: 10,
-                letterSpacing: "0.14em",
-                textTransform: "uppercase",
-                color: "var(--fg-muted)",
-              }}
-            >
-              scroll
-            </span>
-            <motion.div
-              animate={{ y: [0, 6, 0] }}
-              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-              style={{ width: 1, height: 28, background: "var(--fg-muted)", opacity: 0.5 }}
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
+          scroll
+        </span>
+        <motion.div
+          animate={{ y: [0, 6, 0] }}
+          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+          style={{ width: 1, height: 28, background: "var(--fg-muted)", opacity: 0.5 }}
+        />
+      </motion.div>
     </section>
   );
+}
+
+function yearStyle(size: number): React.CSSProperties {
+  return {
+    fontFamily: "Inter Tight, sans-serif",
+    fontSize: size,
+    fontWeight: 400,
+    letterSpacing: "0.1em",
+    color: "var(--accent)",
+    whiteSpace: "nowrap",
+  };
 }

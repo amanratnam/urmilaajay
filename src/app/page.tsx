@@ -11,17 +11,26 @@ export const revalidate = 3600;
 
 export default async function Home() {
   const photos = await getPhotos();
-  const heroPhotos = photos.slice(0, 10);
+
+  // Hero background: a single photo of Urmila only (subject === "urmila").
+  // Controlled via admin sort order — the first "urmila" photo wins.
+  const heroPhoto =
+    photos.find((p) => p.subject === "urmila") ?? photos[0] ?? null;
+
+  // Interstitial: a different urmila photo if possible, else any other.
   const interstitial =
-    photos.find((p) => p.subject === "urmila" && p.aspectRatio > 1) ??
-    photos[0] ??
+    photos.find(
+      (p) => p.subject === "urmila" && p.id !== heroPhoto?.id
+    ) ??
+    photos.find((p) => p.id !== heroPhoto?.id) ??
+    heroPhoto ??
     null;
 
   return (
     <SmoothScrollProvider>
       <Nav />
       <main>
-        <HeroSection photos={heroPhotos} />
+        <HeroSection photo={heroPhoto} />
         <IntroSection />
         <GalleryCarousel photos={photos} id="gallery" />
         {interstitial && <InterstitialSection photo={interstitial} />}

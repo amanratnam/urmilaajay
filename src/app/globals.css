@@ -202,6 +202,31 @@ img {
   animation: tileIn 1.1s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
+/* ─── Floating hero words (3D drift) ─────────────────────────────── */
+@keyframes floatWord {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-18px); }
+}
+
+/* ─── Hero content entrance (CSS — reliable regardless of JS) ─────── */
+@keyframes heroReveal {
+  from { opacity: 0; transform: translateY(36px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes heroRule {
+  from { opacity: 0; transform: scaleX(0); }
+  to   { opacity: 1; transform: scaleX(1); }
+}
+.hero-reveal {
+  opacity: 0;
+  animation: heroReveal 1.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.hero-rule-in {
+  opacity: 0;
+  transform-origin: center;
+  animation: heroRule 1.2s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
 /* ─── Reduced motion ─────────────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
   *,
