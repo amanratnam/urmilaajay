@@ -228,7 +228,7 @@ export function CommentThread({ photoId }: Props) {
                 letterSpacing: "0.12em",
                 textTransform: "uppercase",
                 padding: "12px 24px",
-                cursor: "none",
+                cursor: "pointer",
                 opacity: status === "submitting" ? 0.5 : 1,
                 transition: "border-color 0.3s, opacity 0.3s",
               }}

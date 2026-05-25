@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidateTag } from "next/cache";
 
 function checkAuth(req: NextRequest): boolean {
   const password = req.headers.get("x-admin-password");
@@ -33,6 +34,7 @@ export async function PATCH(
     .eq("id", params.id);
 
   if (error) return NextResponse.json({ error: "Failed to approve." }, { status: 500 });
+  revalidateTag("comments");
   return NextResponse.json({ ok: true });
 }
 
@@ -54,5 +56,6 @@ export async function DELETE(
     .eq("id", params.id);
 
   if (error) return NextResponse.json({ error: "Failed to delete." }, { status: 500 });
+  revalidateTag("comments");
   return NextResponse.json({ ok: true });
 }

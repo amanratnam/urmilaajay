@@ -6,11 +6,15 @@ import { GalleryCarousel } from "@/components/gallery/GalleryCarousel";
 import { InterstitialSection } from "@/components/layout/InterstitialSection";
 import { FooterSection } from "@/components/layout/FooterSection";
 import { getPhotos } from "@/lib/photos";
+import { getApprovedCommentCounts } from "@/lib/comments";
 
 export const revalidate = 3600;
 
 export default async function Home() {
-  const photos = await getPhotos();
+  const [photos, counts] = await Promise.all([
+    getPhotos(),
+    getApprovedCommentCounts(),
+  ]);
 
   // Hero background: a single photo of Urmila only (subject === "urmila").
   // Controlled via admin sort order — the first "urmila" photo wins.
@@ -32,7 +36,7 @@ export default async function Home() {
       <main>
         <HeroSection photo={heroPhoto} />
         <IntroSection />
-        <GalleryCarousel photos={photos} id="gallery" />
+        <GalleryCarousel photos={photos} counts={counts} id="gallery" />
         {interstitial && <InterstitialSection photo={interstitial} />}
       </main>
       <FooterSection />

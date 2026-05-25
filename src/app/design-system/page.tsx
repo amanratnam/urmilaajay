@@ -110,7 +110,7 @@ export default function DesignSystemPage() {
                   borderRadius: 4,
                   overflow: "hidden",
                   position: "relative",
-                  cursor: "none",
+                  cursor: "pointer",
                 }}
                 whileHover={{ scale: 1.02 }}
                 transition={{ duration: 0.6, ease: easeMemorial }}

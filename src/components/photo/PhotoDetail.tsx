@@ -112,7 +112,7 @@ export function PhotoDetail({ photo, prev, next }: Props) {
             display: "flex",
             alignItems: "center",
             gap: 10,
-            cursor: "none",
+            cursor: "pointer",
           }}
         >
           <span style={{ fontSize: 14, lineHeight: 1 }}>←</span>
@@ -153,7 +153,7 @@ export function PhotoDetail({ photo, prev, next }: Props) {
             position: "relative",
             maxWidth: isPortrait ? "min(420px, 52vh)" : "min(820px, 76vw)",
             width: "100%",
-            cursor: "none",
+            cursor: "pointer",
             transition: "transform 0.22s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.22s cubic-bezier(0.22, 1, 0.36, 1)",
             transformStyle: "preserve-3d",
             boxShadow: "0px 20px 60px rgba(0,0,0,0.4)",
@@ -273,7 +273,7 @@ export function PhotoDetail({ photo, prev, next }: Props) {
                 display: "flex",
                 alignItems: "center",
                 gap: 10,
-                cursor: "none",
+                cursor: "pointer",
               }}
             >
               <span style={{ fontSize: 14 }}>←</span>
@@ -297,7 +297,7 @@ export function PhotoDetail({ photo, prev, next }: Props) {
                 display: "flex",
                 alignItems: "center",
                 gap: 10,
-                cursor: "none",
+                cursor: "pointer",
               }}
             >
               Next

@@ -94,17 +94,27 @@ export function HeroSection({ photo }: Props) {
               style={{
                 objectFit: "cover",
                 objectPosition: "center 30%",
-                filter: "brightness(0.4) saturate(1.05)",
+                filter: "brightness(0.72) saturate(1.08) contrast(1.02)",
                 pointerEvents: "none",
               }}
             />
           </motion.div>
+          {/* Lighter wash — keeps the photo visible */}
           <div
             style={{
               position: "absolute",
               inset: 0,
               background:
-                "linear-gradient(to bottom, rgba(18,16,14,0.55) 0%, rgba(18,16,14,0.35) 45%, rgba(18,16,14,0.75) 100%)",
+                "linear-gradient(to bottom, rgba(18,16,14,0.3) 0%, rgba(18,16,14,0.12) 42%, rgba(18,16,14,0.55) 100%)",
+            }}
+          />
+          {/* Focused scrim behind the centred text for readability */}
+          <div
+            style={{
+              position: "absolute",
+              inset: 0,
+              background:
+                "radial-gradient(ellipse 60% 50% at 50% 50%, rgba(12,10,8,0.62) 0%, rgba(12,10,8,0.28) 45%, transparent 75%)",
             }}
           />
         </motion.div>

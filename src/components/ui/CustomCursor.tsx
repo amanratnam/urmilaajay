@@ -2,22 +2,34 @@
 
 import { useEffect, useRef, useState } from "react";
 
+/**
+ * Desktop-only "view" hover badge. The native OS cursor stays visible
+ * everywhere; this just adds a soft gold circle with a label when hovering
+ * a [data-cursor] element. Renders nothing on touch / coarse-pointer devices.
+ */
 export function CustomCursor() {
-  const dotRef = useRef<HTMLDivElement>(null);
-  const labelRef = useRef<HTMLDivElement>(null);
-  const [label, setLabel] = useState("");
-  const [isHovering, setIsHovering] = useState(false);
+  const badgeRef = useRef<HTMLDivElement>(null);
+  const [enabled, setEnabled] = useState(false);
+  const [visible, setVisible] = useState(false);
+  const [label, setLabel] = useState("view");
 
   useEffect(() => {
-    const dot = dotRef.current;
-    const labelEl = labelRef.current;
-    if (!dot || !labelEl) return;
+    // Only on hover-capable, fine-pointer devices (desktop mouse) —
+    // touch / mobile report "(hover: none)" and are excluded.
+    if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
+    setEnabled(true);
+  }, []);
 
-    let x = 0;
-    let y = 0;
-    let dotX = 0;
-    let dotY = 0;
-    let raf: number;
+  useEffect(() => {
+    if (!enabled) return;
+    const badge = badgeRef.current;
+    if (!badge) return;
+
+    let x = window.innerWidth / 2;
+    let y = window.innerHeight / 2;
+    let bx = x;
+    let by = y;
+    let raf = 0;
 
     const onMove = (e: MouseEvent) => {
       x = e.clientX;
@@ -25,72 +37,43 @@ export function CustomCursor() {
     };
 
     const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
-
     const tick = () => {
-      dotX = lerp(dotX, x, 0.12);
-      dotY = lerp(dotY, y, 0.12);
-      dot.style.transform = `translate(${dotX}px, ${dotY}px) translate(-50%, -50%)`;
-      labelEl.style.transform = `translate(${dotX}px, ${dotY}px) translate(-50%, -50%)`;
+      bx = lerp(bx, x, 0.2);
+      by = lerp(by, y, 0.2);
+      badge.style.left = `${bx}px`;
+      badge.style.top = `${by}px`;
       raf = requestAnimationFrame(tick);
     };
-
     raf = requestAnimationFrame(tick);
+
+    const onOver = (e: MouseEvent) => {
+      const t = (e.target as HTMLElement).closest("[data-cursor]");
+      if (t) {
+        setLabel((t as HTMLElement).dataset.cursor || "view");
+        setVisible(true);
+      }
+    };
+    const onOut = (e: MouseEvent) => {
+      if ((e.target as HTMLElement).closest("[data-cursor]")) setVisible(false);
+    };
+
     window.addEventListener("mousemove", onMove);
-
-    const onEnter = (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
-      const tile = target.closest("[data-cursor]");
-      if (tile) {
-        const cursorLabel = (tile as HTMLElement).dataset.cursor ?? "view";
-        setLabel(cursorLabel);
-        setIsHovering(true);
-      }
-    };
-
-    const onLeave = (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
-      const tile = target.closest("[data-cursor]");
-      if (tile) {
-        setIsHovering(false);
-        setLabel("");
-      }
-    };
-
-    document.addEventListener("mouseover", onEnter);
-    document.addEventListener("mouseout", onLeave);
-
-    // Block right-click / long-press save on images site-wide
-    const onContextMenu = (e: MouseEvent) => {
-      if ((e.target as HTMLElement)?.tagName === "IMG") e.preventDefault();
-    };
-    const onDragStart = (e: DragEvent) => {
-      if ((e.target as HTMLElement)?.tagName === "IMG") e.preventDefault();
-    };
-    document.addEventListener("contextmenu", onContextMenu);
-    document.addEventListener("dragstart", onDragStart);
+    document.addEventListener("mouseover", onOver);
+    document.addEventListener("mouseout", onOut);
 
     return () => {
       cancelAnimationFrame(raf);
       window.removeEventListener("mousemove", onMove);
-      document.removeEventListener("mouseover", onEnter);
-      document.removeEventListener("mouseout", onLeave);
-      document.removeEventListener("contextmenu", onContextMenu);
-      document.removeEventListener("dragstart", onDragStart);
+      document.removeEventListener("mouseover", onOver);
+      document.removeEventListener("mouseout", onOut);
     };
-  }, []);
+  }, [enabled]);
+
+  if (!enabled) return null;
 
   return (
-    <>
-      <div
-        ref={dotRef}
-        className={`cursor-dot ${isHovering ? "cursor-hover" : ""}`}
-      />
-      <div
-        ref={labelRef}
-        className={`cursor-label ${isHovering ? "cursor-hover" : ""}`}
-      >
-        {label}
-      </div>
-    </>
+    <div ref={badgeRef} className={`cursor-view ${visible ? "cursor-visible" : ""}`}>
+      {label}
+    </div>
   );
 }

@@ -32,7 +32,6 @@ body {
   font-size: 17px;
   line-height: 1.7;
   overflow-x: hidden;
-  cursor: none;
 }
 
 /* ─── Film grain overlay ─────────────────────────────────────────── */
@@ -60,52 +59,37 @@ body {
   );
 }
 
-/* ─── Custom cursor ──────────────────────────────────────────────── */
-.cursor-dot {
+/* ─── "View" hover badge (desktop only — native cursor stays visible) ─ */
+.cursor-view {
   position: fixed;
   top: 0;
   left: 0;
-  width: 8px;
-  height: 8px;
-  background: var(--fg);
+  width: 72px;
+  height: 72px;
   border-radius: 50%;
   pointer-events: none;
   z-index: 10000;
-  transform: translate(-50%, -50%);
-  transition: width 300ms var(--ease-memorial),
-              height 300ms var(--ease-memorial),
-              background 300ms var(--ease-memorial),
-              border-radius 300ms var(--ease-memorial);
-  mix-blend-mode: difference;
-}
-
-.cursor-dot.cursor-hover {
-  width: 64px;
-  height: 64px;
-  border-radius: 50%;
-  background: var(--fg);
-}
-
-.cursor-label {
-  position: fixed;
-  top: 0;
-  left: 0;
-  pointer-events: none;
-  z-index: 10001;
-  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: translate(-50%, -50%) scale(0);
+  background: rgba(201, 168, 120, 0.18);
+  border: 1px solid rgba(201, 168, 120, 0.55);
+  backdrop-filter: blur(2px);
   font-family: 'Inter Tight', sans-serif;
   font-size: 10px;
   font-weight: 500;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--bg);
+  color: var(--fg);
   opacity: 0;
-  transition: opacity 300ms var(--ease-memorial);
-  mix-blend-mode: normal;
+  transition: opacity 280ms var(--ease-memorial),
+              transform 280ms var(--ease-memorial);
 }
 
-.cursor-label.cursor-hover {
+.cursor-view.cursor-visible {
   opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
 }
 
 /* ─── Image protection (download deterrents) ────────────────────────
