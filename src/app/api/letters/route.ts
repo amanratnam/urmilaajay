@@ -48,12 +48,13 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Missing fields." }, { status: 400 });
   }
 
-  const trimmedName = name.trim().slice(0, 80);
+  // Name is optional — visitors may choose to remain anonymous.
+  const trimmedName = name.trim().slice(0, 80) || "Anonymous";
   const trimmedEmail = email.trim().slice(0, 140);
   const trimmedBody = body.trim();
 
-  if (!trimmedName || !trimmedEmail || !trimmedBody) {
-    return NextResponse.json({ error: "All fields are required." }, { status: 400 });
+  if (!trimmedEmail || !trimmedBody) {
+    return NextResponse.json({ error: "Email and memory are required." }, { status: 400 });
   }
   if (trimmedBody.length > 1000) {
     return NextResponse.json({ error: "Please keep the letter under 1000 characters." }, { status: 400 });

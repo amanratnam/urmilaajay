@@ -70,20 +70,25 @@ export function HeroSection({ photos }: Props) {
         />
 
         <p className="hero-message hero-reveal" style={{ animationDelay: "0.8s" }}>
-          Welcome to a memorial space for{" "}
-          <em className="w-700">Urmila</em> and <em className="w-700">Ajay</em>. We
-          (their kids) have created this website to let them{" "}
-          <em className="w-600 it">live on the internet</em> — a place for anyone
-          who knew them to revisit the memories they shared, and to{" "}
-          <em className="w-600 it">add their own</em>. We{" "}
-          <em className="w-800">loved</em> you while you were on Earth, we{" "}
-          <em className="w-900 it">love</em> you while you&apos;re in heaven, and we
-          hope you&apos;re <em className="w-700">happier</em> than you ever were.{" "}
-          <em className="w-900 it">Miss you, mom and dad.</em>
+          Welcome to a <em className="w-600 it">peaceful memorial space</em>{" "}
+          for <em className="w-700">Urmila</em> (mom) and{" "}
+          <em className="w-700">Ajay</em> (dad). We (their kids and
+          daughter-in-law) have created this website to let them{" "}
+          <em className="w-600 it">live on the internet</em> and become a place
+          for anyone who knew them to revisit the memories they shared, and
+          to <em className="w-600 it">add their own</em>.
         </p>
 
-        <span className="hero-sign hero-reveal" style={{ animationDelay: "1.05s" }}>
-          — Aman &amp; Aashi
+        <p className="hero-message hero-reveal" style={{ animationDelay: "0.95s", marginTop: 8 }}>
+          To <em className="w-700">mom</em> and <em className="w-700">dad</em>,
+          we <em className="w-800">loved</em> you while you were on Earth, we{" "}
+          <em className="w-900 it">love</em> you while you&apos;re in heaven,
+          and we hope you&apos;re <em className="w-700">happier</em> than you
+          ever were. <em className="w-900 it">Miss you, mom and dad.</em>
+        </p>
+
+        <span className="hero-sign hero-reveal" style={{ animationDelay: "1.15s" }}>
+          — Aman, Aashi &amp; Shilpa
         </span>
       </div>
 
