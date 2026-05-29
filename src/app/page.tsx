@@ -1,9 +1,8 @@
 import { SmoothScrollProvider } from "@/components/layout/SmoothScrollProvider";
 import { Nav } from "@/components/layout/Nav";
 import { HeroSection } from "@/components/layout/HeroSection";
-import { IntroSection } from "@/components/layout/IntroSection";
+import { PinnedSection } from "@/components/layout/PinnedSection";
 import { GalleryCarousel } from "@/components/gallery/GalleryCarousel";
-import { InterstitialSection } from "@/components/layout/InterstitialSection";
 import { FooterSection } from "@/components/layout/FooterSection";
 import { getPhotos } from "@/lib/photos";
 import { getApprovedCommentCounts } from "@/lib/comments";
@@ -16,28 +15,17 @@ export default async function Home() {
     getApprovedCommentCounts(),
   ]);
 
-  // Hero background: a single photo of Urmila only (subject === "urmila").
-  // Controlled via admin sort order — the first "urmila" photo wins.
-  const heroPhoto =
+  // Photo for the pinned-parallax backdrop: prefer Urmila, fall back to any.
+  const pinnedPhoto =
     photos.find((p) => p.subject === "urmila") ?? photos[0] ?? null;
-
-  // Interstitial: a different urmila photo if possible, else any other.
-  const interstitial =
-    photos.find(
-      (p) => p.subject === "urmila" && p.id !== heroPhoto?.id
-    ) ??
-    photos.find((p) => p.id !== heroPhoto?.id) ??
-    heroPhoto ??
-    null;
 
   return (
     <SmoothScrollProvider>
       <Nav />
       <main>
-        <HeroSection photo={heroPhoto} />
-        <IntroSection />
+        <HeroSection photos={photos} />
+        <PinnedSection photo={pinnedPhoto} />
         <GalleryCarousel photos={photos} counts={counts} id="gallery" />
-        {interstitial && <InterstitialSection photo={interstitial} />}
       </main>
       <FooterSection />
     </SmoothScrollProvider>

@@ -1,16 +1,21 @@
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;1,9..144,300;1,9..144,500&family=Inter+Tight:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;1,9..144,300;1,9..144,500&family=Outfit:wght@100..900&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --bg: #12100E;
-  --bg-elevated: #1A1815;
-  --fg: #F2EDE4;
-  --fg-muted: #8A8278;
-  --accent: #C9A878;
-  --border: #2A2622;
+  --bg: #FAF9F6;             /* off-white */
+  --bg-elevated: #F2EFE9;    /* slightly toned for cards */
+  --bg-deep: #ECE7DE;        /* deeper section break */
+  --fg: #1F1B17;             /* warm near-black for body */
+  --fg-soft: #3A332C;        /* heading tone */
+  --fg-muted: #6B635A;       /* warm muted */
+  --accent: #8B6E3F;         /* refined gold, reads on light bg */
+  --accent-soft: #C9A878;    /* original gold, used for fills/glows */
+  --border: #E1DCD3;         /* light warm border */
+  --shadow: 0 10px 30px rgba(60, 50, 38, 0.08);
+  --shadow-lg: 0 30px 80px rgba(60, 50, 38, 0.18);
   --ease-memorial: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
@@ -28,25 +33,26 @@ html {
 body {
   background-color: var(--bg);
   color: var(--fg);
-  font-family: 'Inter Tight', sans-serif;
+  font-family: 'Outfit', system-ui, sans-serif;
   font-size: 17px;
+  font-weight: 300;
   line-height: 1.7;
   overflow-x: hidden;
 }
 
-/* ─── Film grain overlay ─────────────────────────────────────────── */
+/* ─── Film grain overlay (subtle warm paper texture) ─────────────── */
 .grain-overlay {
   position: fixed;
   inset: 0;
   z-index: 9999;
   pointer-events: none;
-  opacity: 0.04;
-  mix-blend-mode: overlay;
+  opacity: 0.035;
+  mix-blend-mode: multiply;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
   background-size: 256px 256px;
 }
 
-/* ─── Vignette overlay ───────────────────────────────────────────── */
+/* ─── Vignette overlay (gentle warm edge fall-off) ───────────────── */
 .vignette-overlay {
   position: fixed;
   inset: 0;
@@ -54,8 +60,8 @@ body {
   pointer-events: none;
   background: radial-gradient(
     ellipse at center,
-    transparent 50%,
-    rgba(10, 8, 6, 0.15) 100%
+    transparent 55%,
+    rgba(120, 95, 55, 0.07) 100%
   );
 }
 
@@ -73,10 +79,10 @@ body {
   align-items: center;
   justify-content: center;
   transform: translate(-50%, -50%) scale(0);
-  background: rgba(201, 168, 120, 0.18);
-  border: 1px solid rgba(201, 168, 120, 0.55);
-  backdrop-filter: blur(2px);
-  font-family: 'Inter Tight', sans-serif;
+  background: rgba(139, 110, 63, 0.16);
+  border: 1px solid rgba(139, 110, 63, 0.55);
+  backdrop-filter: blur(3px);
+  font-family: 'Outfit', sans-serif;
   font-size: 10px;
   font-weight: 500;
   letter-spacing: 0.14em;
@@ -106,6 +112,35 @@ img {
 ::selection {
   background: var(--accent);
   color: var(--bg);
+}
+
+/* ─── Mobile-exclusive hero animation ────────────────────────────── */
+@keyframes heartbeat {
+  0%, 100% { transform: scale(1); }
+  40%      { transform: scale(1.04); }
+  55%      { transform: scale(0.99); }
+  70%      { transform: scale(1.02); }
+}
+@keyframes lineRise {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@media (max-width: 768px) {
+  .hero-message em.w-800,
+  .hero-message em.w-900 {
+    display: inline-block;
+    animation: heartbeat 4.6s ease-in-out infinite;
+    transform-origin: center;
+  }
+  .hero-message em.w-900.it {
+    animation-duration: 5.2s;
+    animation-delay: 0.6s;
+  }
+  /* Per-line rise on mobile only */
+  .mobile-rise > * {
+    opacity: 0;
+    animation: lineRise 0.9s cubic-bezier(0.22,1,0.36,1) both;
+  }
 }
 
 /* ─── Scrollbar ──────────────────────────────────────────────────── */
@@ -143,7 +178,7 @@ img {
 }
 
 .hero-dates {
-  font-family: 'Inter Tight', sans-serif;
+  font-family: 'Outfit', sans-serif;
   font-size: 13px;
   font-weight: 400;
   letter-spacing: 0.12em;
@@ -168,7 +203,7 @@ img {
 }
 
 .tile-caption {
-  font-family: 'Inter Tight', sans-serif;
+  font-family: 'Outfit', sans-serif;
   font-size: 13px;
   font-weight: 500;
   letter-spacing: 0.08em;
@@ -209,6 +244,86 @@ img {
   opacity: 0;
   transform-origin: center;
   animation: heroRule 1.2s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* ─── Outfit weight utilities (variable-weight emphasis) ─────────── */
+.w-100 { font-family: 'Outfit', sans-serif; font-weight: 100; }
+.w-200 { font-family: 'Outfit', sans-serif; font-weight: 200; }
+.w-300 { font-family: 'Outfit', sans-serif; font-weight: 300; }
+.w-400 { font-family: 'Outfit', sans-serif; font-weight: 400; }
+.w-500 { font-family: 'Outfit', sans-serif; font-weight: 500; }
+.w-600 { font-family: 'Outfit', sans-serif; font-weight: 600; }
+.w-700 { font-family: 'Outfit', sans-serif; font-weight: 700; }
+.w-800 { font-family: 'Outfit', sans-serif; font-weight: 800; }
+.w-900 { font-family: 'Outfit', sans-serif; font-weight: 900; }
+.italic { font-style: italic; }
+
+/* ─── New split hero (Outfit-driven typography) ──────────────────── */
+.hero-eyebrow {
+  font-family: 'Outfit', sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+.hero-display {
+  font-family: 'Outfit', sans-serif;
+  font-size: clamp(54px, 6.5vw, 104px);
+  line-height: 1.02;
+  letter-spacing: -0.025em;
+  color: var(--fg);
+  margin: 0;
+}
+.hero-display .hero-years {
+  font-family: 'Outfit', sans-serif;
+  font-weight: 300;
+  font-size: clamp(13px, 0.95vw, 16px);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent);
+  vertical-align: middle;
+  margin-left: 14px;
+  white-space: nowrap;
+}
+.hero-message {
+  font-family: 'Outfit', sans-serif;
+  font-size: clamp(15px, 1.15vw, 18px);
+  font-weight: 300;
+  line-height: 1.7;
+  color: var(--fg);
+  max-width: 560px;
+  margin: 0;
+}
+.hero-message em { font-style: normal; }
+.hero-message em.it { font-style: italic; }
+.hero-sign {
+  font-family: 'Outfit', sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+  font-style: italic;
+  color: var(--fg-muted);
+  letter-spacing: 0.04em;
+}
+
+/* ─── Vertical marquees (auto-scrolling photo columns) ───────────── */
+@keyframes marquee-up   { from { transform: translateY(0); }     to { transform: translateY(-50%); } }
+@keyframes marquee-down { from { transform: translateY(-50%); } to { transform: translateY(0); } }
+
+/* ─── Pinned statement panels ────────────────────────────────────── */
+.pinned-statement {
+  font-family: 'Outfit', sans-serif;
+  font-size: clamp(40px, 6.5vw, 96px);
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  color: var(--fg);
+  margin: 0;
+}
+.pinned-statement em {
+  font-family: 'Outfit', sans-serif;
+  font-style: italic;
+  font-weight: 900;
+  color: var(--accent);
 }
 
 /* ─── Reduced motion ─────────────────────────────────────────────── */

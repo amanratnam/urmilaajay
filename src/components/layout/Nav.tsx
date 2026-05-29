@@ -41,8 +41,8 @@ export function Nav() {
       </Link>
 
       <div style={{ display: "flex", gap: 32, pointerEvents: "auto" }}>
-        <NavLink href="#archive">Archive</NavLink>
-        <NavLink href="#memories">Memories</NavLink>
+        <NavLink href="#gallery">Archive</NavLink>
+        <NavLink href="#memories">Write</NavLink>
       </div>
     </motion.nav>
   );
@@ -59,7 +59,7 @@ function NavLink({
     <a
       href={href}
       style={{
-        fontFamily: "Inter Tight, sans-serif",
+        fontFamily: "Outfit, sans-serif",
         fontSize: 11,
         fontWeight: 500,
         letterSpacing: "0.1em",

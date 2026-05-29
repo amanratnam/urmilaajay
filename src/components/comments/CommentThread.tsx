@@ -112,7 +112,7 @@ export function CommentThread({ photoId }: Props) {
               </p>
               <span
                 style={{
-                  fontFamily: "Inter Tight, sans-serif",
+                  fontFamily: "Outfit, sans-serif",
                   fontSize: 11,
                   fontWeight: 500,
                   letterSpacing: "0.1em",
@@ -196,7 +196,7 @@ export function CommentThread({ photoId }: Props) {
               />
               <span
                 style={{
-                  fontFamily: "Inter Tight, sans-serif",
+                  fontFamily: "Outfit, sans-serif",
                   fontSize: 10,
                   color: "var(--fg-muted)",
                   textAlign: "right",
@@ -208,7 +208,7 @@ export function CommentThread({ photoId }: Props) {
             </div>
 
             {errorMsg ? (
-              <p style={{ fontFamily: "Inter Tight, sans-serif", fontSize: 12, color: "var(--accent)", margin: 0 }}>
+              <p style={{ fontFamily: "Outfit, sans-serif", fontSize: 12, color: "var(--accent)", margin: 0 }}>
                 {errorMsg}
               </p>
             ) : null}
@@ -222,7 +222,7 @@ export function CommentThread({ photoId }: Props) {
                 background: "transparent",
                 border: "1px solid var(--border)",
                 color: "var(--fg)",
-                fontFamily: "Inter Tight, sans-serif",
+                fontFamily: "Outfit, sans-serif",
                 fontSize: 11,
                 fontWeight: 500,
                 letterSpacing: "0.12em",
@@ -245,7 +245,7 @@ export function CommentThread({ photoId }: Props) {
 }
 
 const labelStyle: React.CSSProperties = {
-  fontFamily: "Inter Tight, sans-serif",
+  fontFamily: "Outfit, sans-serif",
   fontSize: 10,
   fontWeight: 500,
   letterSpacing: "0.12em",
@@ -257,7 +257,7 @@ const inputStyle: React.CSSProperties = {
   background: "var(--bg-elevated)",
   border: "1px solid var(--border)",
   color: "var(--fg)",
-  fontFamily: "Inter Tight, sans-serif",
+  fontFamily: "Outfit, sans-serif",
   fontSize: 14,
   padding: "12px 16px",
   outline: "none",

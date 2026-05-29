@@ -157,7 +157,7 @@ export function AdminPhotos() {
         />
         <p
           style={{
-            fontFamily: "Inter Tight, sans-serif",
+            fontFamily: "Outfit, sans-serif",
             fontSize: 12,
             letterSpacing: "0.06em",
             color: "var(--fg)",
@@ -168,7 +168,7 @@ export function AdminPhotos() {
         </p>
         <p
           style={{
-            fontFamily: "Inter Tight, sans-serif",
+            fontFamily: "Outfit, sans-serif",
             fontSize: 10,
             letterSpacing: "0.06em",
             color: "var(--fg-muted)",
@@ -180,14 +180,14 @@ export function AdminPhotos() {
       </div>
 
       {msg && (
-        <p style={{ fontFamily: "Inter Tight, sans-serif", fontSize: 12, color: "var(--accent)", marginBottom: 16 }}>
+        <p style={{ fontFamily: "Outfit, sans-serif", fontSize: 12, color: "var(--accent)", marginBottom: 16 }}>
           {msg}
         </p>
       )}
 
       {/* Photo list */}
       {loading ? (
-        <p style={{ fontFamily: "Inter Tight, sans-serif", fontSize: 12, color: "var(--fg-muted)" }}>Loading…</p>
+        <p style={{ fontFamily: "Outfit, sans-serif", fontSize: 12, color: "var(--fg-muted)" }}>Loading…</p>
       ) : photos.length === 0 ? (
         <p
           style={{
@@ -265,7 +265,7 @@ export function AdminPhotos() {
                         </option>
                       ))}
                     </select>
-                    <span style={{ fontFamily: "Inter Tight, sans-serif", fontSize: 11, color: "var(--fg-muted)" }}>
+                    <span style={{ fontFamily: "Outfit, sans-serif", fontSize: 11, color: "var(--fg-muted)" }}>
                       {p.year ?? "—"}
                     </span>
                   </div>
@@ -291,7 +291,7 @@ export function AdminPhotos() {
                     style={{
                       background: "none",
                       border: "none",
-                      fontFamily: "Inter Tight, sans-serif",
+                      fontFamily: "Outfit, sans-serif",
                       fontSize: 10,
                       letterSpacing: "0.1em",
                       textTransform: "uppercase",
@@ -316,7 +316,7 @@ const fieldStyle: React.CSSProperties = {
   background: "var(--bg)",
   border: "1px solid var(--border)",
   color: "var(--fg)",
-  fontFamily: "Inter Tight, sans-serif",
+  fontFamily: "Outfit, sans-serif",
   fontSize: 13,
   padding: "8px 12px",
   outline: "none",

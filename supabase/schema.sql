@@ -54,6 +54,25 @@ create policy "Public insert comments"
   on comments for insert with check (true);
 
 
+-- ─── PERSONAL LETTERS (private notes straight to admin) ─────────────
+create table if not exists letters (
+  id           uuid primary key default gen_random_uuid(),
+  author_name  text not null,
+  author_email text not null,
+  body         text not null,
+  created_at   timestamptz not null default now()
+);
+
+create index if not exists letters_created_idx on letters (created_at desc);
+
+alter table letters enable row level security;
+
+-- Anyone may insert (server enforces validation + rate-limit + honeypot).
+-- Only the service role (admin API) may read.
+drop policy if exists "Public insert letters" on letters;
+create policy "Public insert letters" on letters for insert with check (true);
+
+
 -- ─── STORAGE BUCKET ──────────────────────────────────────────────────
 -- The private `photos` bucket is created automatically by the migration
 -- script (scripts/migrate-to-supabase.ts) using the service-role key.

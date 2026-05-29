@@ -102,7 +102,7 @@ export function PhotoDetail({ photo, prev, next }: Props) {
           href="/"
           data-cursor="view"
           style={{
-            fontFamily: "Inter Tight, sans-serif",
+            fontFamily: "Outfit, sans-serif",
             fontSize: 11,
             fontWeight: 500,
             letterSpacing: "0.12em",
@@ -121,7 +121,7 @@ export function PhotoDetail({ photo, prev, next }: Props) {
 
         <span
           style={{
-            fontFamily: "Inter Tight, sans-serif",
+            fontFamily: "Outfit, sans-serif",
             fontSize: 11,
             fontWeight: 400,
             letterSpacing: "0.1em",
@@ -224,7 +224,7 @@ export function PhotoDetail({ photo, prev, next }: Props) {
           >
             <span
               style={{
-                fontFamily: "Inter Tight, sans-serif",
+                fontFamily: "Outfit, sans-serif",
                 fontSize: 11,
                 fontWeight: 500,
                 letterSpacing: "0.12em",
@@ -263,7 +263,7 @@ export function PhotoDetail({ photo, prev, next }: Props) {
               href={`/photo/${prev.slug}`}
               data-cursor="view"
               style={{
-                fontFamily: "Inter Tight, sans-serif",
+                fontFamily: "Outfit, sans-serif",
                 fontSize: 11,
                 fontWeight: 500,
                 letterSpacing: "0.12em",
@@ -287,7 +287,7 @@ export function PhotoDetail({ photo, prev, next }: Props) {
               href={`/photo/${next.slug}`}
               data-cursor="view"
               style={{
-                fontFamily: "Inter Tight, sans-serif",
+                fontFamily: "Outfit, sans-serif",
                 fontSize: 11,
                 fontWeight: 500,
                 letterSpacing: "0.12em",

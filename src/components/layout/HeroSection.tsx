@@ -1,287 +1,173 @@
 "use client";
 
-import { useRef, useCallback } from "react";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { useMemo } from "react";
 import Image from "next/image";
-import dynamic from "next/dynamic";
 import { Photo } from "@/types";
-import { FloatingWords } from "./FloatingWords";
 import { useIsMobile } from "@/hooks/useMediaQuery";
 
-const HeroParticles = dynamic(
-  () => import("@/components/three/HeroParticles").then((m) => m.HeroParticles),
-  { ssr: false }
-);
-
-const ease = [0.22, 1, 0.36, 1] as const;
-
-const MESSAGE =
-  "Welcome to a memorial space for Urmila and Ajay. We (their kids) have created this website to allow them to live on the internet and for any of the loved ones to access the memories they had with them, and add their own. We loved you while you were on Earth, we love you while you're in heaven, and we hope you're happier than you ever were. Miss you mom and dad.";
-
 interface Props {
-  photo: Photo | null;
+  photos: Photo[];
 }
 
-export function HeroSection({ photo }: Props) {
+/**
+ * Split hero: heartfelt copy on the left, two vertically auto-scrolling
+ * photo marquees on the right. Mobile: text first, single marquee beneath.
+ */
+export function HeroSection({ photos }: Props) {
   const isMobile = useIsMobile();
-  const ref = useRef<HTMLElement>(null);
-  const titleRef = useRef<HTMLDivElement>(null);
 
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ["start start", "end start"],
-  });
-  // Photo drifts up as you scroll away (parallax)
-  const photoY = useTransform(scrollYProgress, [0, 1], ["0%", "28%"]);
-  const contentOpacity = useTransform(scrollYProgress, [0, 0.7], [1, 0]);
-
-  // Cursor tilt on the title block (desktop only)
-  const onMouseMove = useCallback(
-    (e: React.MouseEvent<HTMLElement>) => {
-      if (isMobile) return;
-      const el = titleRef.current;
-      if (!el || !ref.current) return;
-      const { left, top, width, height } = ref.current.getBoundingClientRect();
-      const x = (e.clientX - left) / width - 0.5;
-      const y = (e.clientY - top) / height - 0.5;
-      el.style.transform = `perspective(1000px) rotateY(${x * 7}deg) rotateX(${-y * 5}deg)`;
-    },
-    [isMobile]
-  );
-  const onMouseLeave = useCallback(() => {
-    const el = titleRef.current;
-    if (el) el.style.transform = "perspective(1000px) rotateY(0deg) rotateX(0deg)";
-  }, []);
-
-  const titleSize = isMobile ? "clamp(64px, 19vw, 96px)" : "clamp(96px, 12vw, 200px)";
-  const yearSize = isMobile ? 13 : 18;
+  // Pick photos for the marquees — spread across the archive
+  const pool = useMemo(() => (photos.length > 0 ? photos.slice(0, Math.min(photos.length, 14)) : []), [photos]);
+  const colA = pool.filter((_, i) => i % 2 === 0).slice(0, 7);
+  const colB = pool.filter((_, i) => i % 2 === 1).slice(0, 7);
 
   return (
     <section
-      ref={ref}
-      onMouseMove={onMouseMove}
-      onMouseLeave={onMouseLeave}
-      onContextMenu={(e) => e.preventDefault()}
       style={{
         position: "relative",
         minHeight: "100svh",
-        overflow: "hidden",
         background: "var(--bg)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: isMobile ? "100px 24px 80px" : "120px 48px",
+        overflow: "hidden",
+        display: "grid",
+        gridTemplateColumns: isMobile ? "1fr" : "1.05fr 1fr",
+        gridTemplateRows: isMobile ? "auto 1fr" : "1fr",
       }}
+      onContextMenu={(e) => e.preventDefault()}
     >
-      {/* ── Static photo of Urmila — animated (Ken Burns + parallax) ── */}
-      {photo && (
-        <motion.div style={{ position: "absolute", inset: "-8% 0", y: photoY, zIndex: 0 }}>
-          <motion.div
-            style={{ position: "absolute", inset: 0 }}
-            initial={{ scale: 1.05 }}
-            animate={{ scale: 1.16 }}
-            transition={{ duration: 18, ease: "easeOut", repeat: Infinity, repeatType: "reverse" }}
-          >
-            <Image
-              src={photo.src}
-              alt="Urmila"
-              fill
-              priority
-              sizes="100vw"
-              draggable={false}
-              placeholder={photo.blurDataURL ? "blur" : "empty"}
-              blurDataURL={photo.blurDataURL}
-              style={{
-                objectFit: "cover",
-                objectPosition: "center 30%",
-                filter: "brightness(0.72) saturate(1.08) contrast(1.02)",
-                pointerEvents: "none",
-              }}
-            />
-          </motion.div>
-          {/* Lighter wash — keeps the photo visible */}
-          <div
-            style={{
-              position: "absolute",
-              inset: 0,
-              background:
-                "linear-gradient(to bottom, rgba(18,16,14,0.3) 0%, rgba(18,16,14,0.12) 42%, rgba(18,16,14,0.55) 100%)",
-            }}
-          />
-          {/* Focused scrim behind the centred text for readability */}
-          <div
-            style={{
-              position: "absolute",
-              inset: 0,
-              background:
-                "radial-gradient(ellipse 60% 50% at 50% 50%, rgba(12,10,8,0.62) 0%, rgba(12,10,8,0.28) 45%, transparent 75%)",
-            }}
-          />
-        </motion.div>
-      )}
-
-      {/* ── Ethereal motes + floating 3D words ──────────────────────── */}
-      <HeroParticles />
-      {!isMobile && <FloatingWords />}
-
-      {/* ── Gold light bloom ────────────────────────────────────────── */}
-      <motion.div
-        aria-hidden
-        initial={{ opacity: 0, scale: 0.85 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 2.4, ease }}
+      {/* ── LEFT — text ─────────────────────────────────────────────── */}
+      <div
         style={{
-          position: "absolute",
-          top: "40%",
-          left: "50%",
-          width: "80vw",
-          height: "80vw",
-          maxWidth: 1000,
-          maxHeight: 1000,
-          transform: "translate(-50%, -50%)",
-          background:
-            "radial-gradient(circle, rgba(201,168,120,0.10) 0%, rgba(201,168,120,0.04) 35%, transparent 65%)",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          padding: isMobile ? "104px 24px 36px" : "120px 56px 100px 7vw",
+          gap: isMobile ? 22 : 28,
           zIndex: 5,
-          pointerEvents: "none",
-        }}
-      />
-
-      {/* ── Content ─────────────────────────────────────────────────── */}
-      <motion.div
-        style={{
-          position: "relative",
-          zIndex: 10,
-          textAlign: "center",
-          maxWidth: 720,
-          opacity: contentOpacity,
         }}
       >
-        <div
-          ref={titleRef}
-          style={{
-            transformStyle: "preserve-3d",
-            transition: "transform 0.65s cubic-bezier(0.22, 1, 0.36, 1)",
-            marginBottom: isMobile ? 28 : 36,
-          }}
-        >
-          {/* Urmila + years */}
-          <div
-            className="hero-reveal"
-            style={{
-              animationDelay: "0.3s",
-              display: "flex",
-              flexDirection: isMobile ? "column" : "row",
-              alignItems: isMobile ? "center" : "baseline",
-              justifyContent: "center",
-              gap: isMobile ? 4 : 16,
-            }}
-          >
-            <span className="hero-title" style={{ fontSize: titleSize, lineHeight: 0.95 }}>
-              Urmila
-            </span>
-            <span style={yearStyle(yearSize)}>1980 – 2018</span>
-          </div>
+        <span className="hero-eyebrow hero-reveal" style={{ animationDelay: "0.1s" }}>
+          A memorial
+        </span>
 
-          {/* & Ajay + years */}
-          <div
-            className="hero-reveal"
-            style={{
-              animationDelay: "0.55s",
-              display: "flex",
-              flexDirection: isMobile ? "column" : "row",
-              alignItems: isMobile ? "center" : "baseline",
-              justifyContent: "center",
-              gap: isMobile ? 4 : 16,
-              marginTop: isMobile ? 12 : 4,
-            }}
-          >
-            <span
-              className="hero-subtitle"
-              style={{ fontSize: isMobile ? "clamp(36px, 12vw, 60px)" : "clamp(48px, 7vw, 110px)", lineHeight: 0.95 }}
-            >
-              &amp; Ajay
-            </span>
-            <span style={yearStyle(yearSize)}>1971 – 2021</span>
-          </div>
-        </div>
+        <h1 className="hero-display hero-reveal" style={{ animationDelay: "0.25s" }}>
+          <span className="w-300">Urmila</span>
+          <span className="hero-years">1980 – 2018</span>
+          <br />
+          <span className="w-200">&amp;&nbsp;</span>
+          <span className="w-300">Ajay</span>
+          <span className="hero-years">1971 – 2021</span>
+        </h1>
 
-        {/* Accent rule */}
         <div
           className="hero-rule-in"
           style={{
-            animationDelay: "0.9s",
-            width: 60,
+            animationDelay: "0.6s",
+            width: 56,
             height: 1,
             background: "var(--accent)",
-            margin: "0 auto 28px",
+            transformOrigin: "left",
           }}
         />
 
-        {/* Memorial message */}
-        <p
-          className="hero-reveal"
-          style={{
-            animationDelay: "1.1s",
-            fontFamily: "Fraunces, Georgia, serif",
-            fontWeight: 300,
-            fontStyle: "italic",
-            fontSize: isMobile ? 15 : 18,
-            lineHeight: 1.7,
-            color: "var(--fg)",
-            maxWidth: 620,
-            margin: "0 auto",
-            textShadow: "0 1px 20px rgba(0,0,0,0.6)",
-          }}
-        >
-          {MESSAGE}
+        <p className="hero-message hero-reveal" style={{ animationDelay: "0.8s" }}>
+          Welcome to a memorial space for{" "}
+          <em className="w-700">Urmila</em> and <em className="w-700">Ajay</em>. We
+          (their kids) have created this website to let them{" "}
+          <em className="w-600 it">live on the internet</em> — a place for anyone
+          who knew them to revisit the memories they shared, and to{" "}
+          <em className="w-600 it">add their own</em>. We{" "}
+          <em className="w-800">loved</em> you while you were on Earth, we{" "}
+          <em className="w-900 it">love</em> you while you&apos;re in heaven, and we
+          hope you&apos;re <em className="w-700">happier</em> than you ever were.{" "}
+          <em className="w-900 it">Miss you, mom and dad.</em>
         </p>
-      </motion.div>
 
-      {/* ── Scroll cue ──────────────────────────────────────────────── */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 1, delay: 1.8 }}
+        <span className="hero-sign hero-reveal" style={{ animationDelay: "1.05s" }}>
+          — Aman &amp; Aashi
+        </span>
+      </div>
+
+      {/* ── RIGHT — vertical marquees ───────────────────────────────── */}
+      <div
         style={{
-          position: "absolute",
-          bottom: isMobile ? 28 : 40,
-          left: "50%",
-          transform: "translateX(-50%)",
-          zIndex: 20,
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          gap: 10,
+          position: "relative",
+          height: isMobile ? "58svh" : "100svh",
+          overflow: "hidden",
+          display: "grid",
+          gridTemplateColumns: isMobile ? "1fr 1fr" : "1fr 1fr",
+          gap: isMobile ? 10 : 16,
+          padding: isMobile ? "0 16px 24px" : "24px 5vw 24px 0",
         }}
       >
-        <span
+        <MarqueeColumn photos={colA} direction="up" duration={isMobile ? 42 : 58} />
+        <MarqueeColumn photos={colB} direction="down" duration={isMobile ? 50 : 72} offset={isMobile ? 40 : 64} />
+
+        {/* Soft top + bottom fades into bg */}
+        <div
+          aria-hidden
           style={{
-            fontFamily: "Inter Tight, sans-serif",
-            fontSize: 10,
-            letterSpacing: "0.14em",
-            textTransform: "uppercase",
-            color: "var(--fg-muted)",
+            position: "absolute",
+            inset: 0,
+            pointerEvents: "none",
+            background:
+              "linear-gradient(to bottom, var(--bg) 0%, transparent 9%, transparent 91%, var(--bg) 100%)",
           }}
-        >
-          scroll
-        </span>
-        <motion.div
-          animate={{ y: [0, 6, 0] }}
-          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-          style={{ width: 1, height: 28, background: "var(--fg-muted)", opacity: 0.5 }}
         />
-      </motion.div>
+      </div>
     </section>
   );
 }
 
-function yearStyle(size: number): React.CSSProperties {
-  return {
-    fontFamily: "Inter Tight, sans-serif",
-    fontSize: size,
-    fontWeight: 400,
-    letterSpacing: "0.1em",
-    color: "var(--accent)",
-    whiteSpace: "nowrap",
-  };
+interface MarqueeProps {
+  photos: Photo[];
+  direction: "up" | "down";
+  duration: number;
+  offset?: number;
+}
+
+function MarqueeColumn({ photos, direction, duration, offset = 0 }: MarqueeProps) {
+  // Duplicate the list so the animation can loop seamlessly (0 → -50%)
+  const items = [...photos, ...photos];
+  if (photos.length === 0) return <div />;
+
+  return (
+    <div style={{ position: "relative", overflow: "hidden", paddingTop: offset }}>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: 14,
+          animation: `${direction === "up" ? "marquee-up" : "marquee-down"} ${duration}s linear infinite`,
+          willChange: "transform",
+        }}
+      >
+        {items.map((p, i) => (
+          <div
+            key={`${p.id}-${i}`}
+            style={{
+              position: "relative",
+              width: "100%",
+              aspectRatio: p.aspectRatio,
+              overflow: "hidden",
+              borderRadius: 3,
+              background: "var(--bg-elevated)",
+              flexShrink: 0,
+              boxShadow: "var(--shadow)",
+            }}
+          >
+            <Image
+              src={p.src}
+              alt=""
+              fill
+              sizes="(max-width: 768px) 45vw, 26vw"
+              placeholder={p.blurDataURL ? "blur" : "empty"}
+              blurDataURL={p.blurDataURL}
+              draggable={false}
+              style={{ objectFit: "cover", pointerEvents: "none", userSelect: "none" }}
+            />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 }

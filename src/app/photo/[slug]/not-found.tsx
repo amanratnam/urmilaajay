@@ -34,7 +34,7 @@ export default function PhotoNotFound() {
       <Link
         href="/"
         style={{
-          fontFamily: "Inter Tight, sans-serif",
+          fontFamily: "Outfit, sans-serif",
           fontSize: 11,
           fontWeight: 500,
           letterSpacing: "0.12em",

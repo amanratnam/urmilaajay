@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { AdminPhotos } from "@/components/admin/AdminPhotos";
+import { AdminLetters } from "@/components/admin/AdminLetters";
 
 interface PendingComment {
   id: string;
@@ -15,7 +16,7 @@ interface PendingComment {
 
 const ease = [0.22, 1, 0.36, 1] as const;
 
-type Tab = "memories" | "photos";
+type Tab = "memories" | "photos" | "letters";
 
 export default function AdminPage() {
   const [password, setPassword] = useState("");
@@ -97,7 +98,7 @@ export default function AdminPage() {
         minHeight: "100svh",
         background: "var(--bg)",
         color: "var(--fg)",
-        fontFamily: "Inter Tight, sans-serif",
+        fontFamily: "Outfit, sans-serif",
       }}
     >
       {/* Header */}
@@ -206,7 +207,7 @@ export default function AdminPage() {
                     fontSize: 14,
                     padding: "12px 16px",
                     outline: "none",
-                    fontFamily: "Inter Tight, sans-serif",
+                    fontFamily: "Outfit, sans-serif",
                   }}
                 />
                 {authError && (
@@ -227,7 +228,7 @@ export default function AdminPage() {
                     padding: "12px 24px",
                     cursor: loading ? "default" : "pointer",
                     opacity: loading ? 0.5 : 1,
-                    fontFamily: "Inter Tight, sans-serif",
+                    fontFamily: "Outfit, sans-serif",
                     transition: "border-color 0.3s",
                   }}
                   onMouseEnter={(e) =>
@@ -252,14 +253,14 @@ export default function AdminPage() {
             >
               {/* Tab switcher */}
               <div style={{ display: "flex", gap: 24, marginBottom: 48, borderBottom: "1px solid var(--border)", paddingBottom: 16 }}>
-                {(["memories", "photos"] as Tab[]).map((t) => (
+                {(["memories", "photos", "letters"] as Tab[]).map((t) => (
                   <button
                     key={t}
                     onClick={() => setTab(t)}
                     style={{
                       background: "none",
                       border: "none",
-                      fontFamily: "Inter Tight, sans-serif",
+                      fontFamily: "Outfit, sans-serif",
                       fontSize: 11,
                       fontWeight: 500,
                       letterSpacing: "0.12em",
@@ -275,6 +276,8 @@ export default function AdminPage() {
               </div>
 
               {tab === "photos" && <AdminPhotos />}
+
+              {tab === "letters" && <AdminLetters />}
 
               {tab === "memories" && (
               <>
@@ -422,7 +425,7 @@ export default function AdminPage() {
                               padding: "8px 18px",
                               cursor: acting === c.id ? "default" : "pointer",
                               opacity: acting === c.id ? 0.5 : 1,
-                              fontFamily: "Inter Tight, sans-serif",
+                              fontFamily: "Outfit, sans-serif",
                               transition: "background 0.2s, color 0.2s",
                             }}
                             onMouseEnter={(e) => {
@@ -452,7 +455,7 @@ export default function AdminPage() {
                               padding: "8px 18px",
                               cursor: acting === c.id ? "default" : "pointer",
                               opacity: acting === c.id ? 0.5 : 1,
-                              fontFamily: "Inter Tight, sans-serif",
+                              fontFamily: "Outfit, sans-serif",
                               transition: "border-color 0.2s, color 0.2s",
                             }}
                             onMouseEnter={(e) => {
@@ -487,7 +490,7 @@ export default function AdminPage() {
                   color: "var(--fg-muted)",
                   cursor: "pointer",
                   padding: 0,
-                  fontFamily: "Inter Tight, sans-serif",
+                  fontFamily: "Outfit, sans-serif",
                 }}
               >
                 ↻ Refresh

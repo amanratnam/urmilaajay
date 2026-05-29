@@ -45,7 +45,7 @@ export default function DesignSystemPage() {
 
         {/* ─── Section 1: Typography tokens ─── */}
         <section style={{ padding: "160px 80px", borderBottom: "1px solid var(--border)" }}>
-          <p style={{ fontFamily: "Inter Tight", fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--fg-muted)", marginBottom: 48 }}>
+          <p style={{ fontFamily: "Outfit", fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--fg-muted)", marginBottom: 48 }}>
             Design System · Typography
           </p>
 
@@ -71,7 +71,7 @@ export default function DesignSystemPage() {
 
         {/* ─── Section 2: Color tokens ─── */}
         <section style={{ padding: "80px", borderBottom: "1px solid var(--border)" }}>
-          <p style={{ fontFamily: "Inter Tight", fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--fg-muted)", marginBottom: 48 }}>
+          <p style={{ fontFamily: "Outfit", fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--fg-muted)", marginBottom: 48 }}>
             Design System · Color
           </p>
           <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
@@ -85,7 +85,7 @@ export default function DesignSystemPage() {
             ].map(({ name, value }) => (
               <div key={name} style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                 <div style={{ width: 80, height: 80, background: value, border: "1px solid #333", borderRadius: 4 }} />
-                <span style={{ fontSize: 11, color: "var(--fg-muted)", fontFamily: "Inter Tight", letterSpacing: "0.06em" }}>{name}</span>
+                <span style={{ fontSize: 11, color: "var(--fg-muted)", fontFamily: "Outfit", letterSpacing: "0.06em" }}>{name}</span>
                 <span style={{ fontSize: 11, color: "var(--fg-muted)", fontFamily: "monospace" }}>{value}</span>
               </div>
             ))}
@@ -94,7 +94,7 @@ export default function DesignSystemPage() {
 
         {/* ─── Section 3: Framer Motion tile ─── */}
         <section style={{ padding: "80px", borderBottom: "1px solid var(--border)" }}>
-          <p style={{ fontFamily: "Inter Tight", fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--fg-muted)", marginBottom: 48 }}>
+          <p style={{ fontFamily: "Outfit", fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--fg-muted)", marginBottom: 48 }}>
             Design System · Motion · Tile hover (600ms, memorial ease)
           </p>
           <div style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
@@ -142,7 +142,7 @@ export default function DesignSystemPage() {
 
         {/* ─── Section 4: Scroll-reveal (Framer Motion whileInView) ─── */}
         <section style={{ padding: "80px", borderBottom: "1px solid var(--border)" }}>
-          <p style={{ fontFamily: "Inter Tight", fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--fg-muted)", marginBottom: 48 }}>
+          <p style={{ fontFamily: "Outfit", fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--fg-muted)", marginBottom: 48 }}>
             Design System · Scroll reveal · staggered
           </p>
           <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
@@ -167,7 +167,7 @@ export default function DesignSystemPage() {
 
         {/* ─── Section 5: GSAP parallax ─── */}
         <section style={{ padding: "80px", borderBottom: "1px solid var(--border)", overflow: "hidden" }}>
-          <p style={{ fontFamily: "Inter Tight", fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--fg-muted)", marginBottom: 48 }}>
+          <p style={{ fontFamily: "Outfit", fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--fg-muted)", marginBottom: 48 }}>
             Design System · GSAP parallax (0.6x speed)
           </p>
           <div style={{ height: 400, position: "relative", overflow: "hidden", borderRadius: 4 }}>
@@ -191,7 +191,7 @@ export default function DesignSystemPage() {
 
         {/* ─── Section 6: GSAP pin ─── */}
         <section style={{ padding: "160px 80px 320px" }}>
-          <p style={{ fontFamily: "Inter Tight", fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--fg-muted)", marginBottom: 48 }}>
+          <p style={{ fontFamily: "Outfit", fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--fg-muted)", marginBottom: 48 }}>
             Design System · GSAP pin (interstitial beat)
           </p>
           <div
