@@ -1,4 +1,4 @@
-export type PhotoSubject = "urmila" | "ajay" | "both" | "family";
+export type PhotoSubject = "urmila" | "ajay" | "both" | "family" | "friends" | "others";
 
 export interface Photo {
   id: string;            // uuid (also used as the URL slug)
