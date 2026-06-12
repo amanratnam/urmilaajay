@@ -306,9 +306,63 @@ img {
   letter-spacing: 0.04em;
 }
 
-/* ─── Vertical marquees (auto-scrolling photo columns) ───────────── */
-@keyframes marquee-up   { from { transform: translateY(0); }     to { transform: translateY(-50%); } }
-@keyframes marquee-down { from { transform: translateY(-50%); } to { transform: translateY(0); } }
+/* ─── Vertical marquees (scroll-reactive photo columns) ──────────── */
+@keyframes marqueeIn {
+  from { opacity: 0; transform: translateY(64px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.marquee-col {
+  opacity: 0;
+  animation: marqueeIn 1.6s var(--ease-memorial) both;
+}
+.marquee-item img {
+  transition: transform 1.4s var(--ease-memorial);
+}
+@media (hover: hover) {
+  .marquee-item:hover img {
+    transform: scale(1.05);
+  }
+}
+
+/* ─── Hero scroll cue ────────────────────────────────────────────── */
+@keyframes cueDrop {
+  0%   { transform: scaleY(0); transform-origin: top; }
+  45%  { transform: scaleY(1); transform-origin: top; }
+  55%  { transform: scaleY(1); transform-origin: bottom; }
+  100% { transform: scaleY(0); transform-origin: bottom; }
+}
+.hero-scroll-cue {
+  position: absolute;
+  left: 50%;
+  bottom: 18px;
+  transform: translateX(-50%);
+  z-index: 6;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  pointer-events: none;
+  opacity: 0;
+  animation: heroReveal 1.4s cubic-bezier(0.22, 1, 0.36, 1) 1.8s both;
+}
+.hero-scroll-cue-label {
+  font-family: 'Outfit', sans-serif;
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--fg-muted);
+}
+.hero-scroll-cue-line {
+  width: 1px;
+  height: 44px;
+  background: var(--accent);
+  animation: cueDrop 2.4s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+@media (max-width: 768px) {
+  .hero-scroll-cue { bottom: 10px; }
+  .hero-scroll-cue-line { height: 32px; }
+}
 
 /* ─── Pinned statement panels ────────────────────────────────────── */
 .pinned-statement {
@@ -324,6 +378,83 @@ img {
   font-style: italic;
   font-weight: 900;
   color: var(--accent);
+}
+
+/* ─── Scroll progress hairline ───────────────────────────────────── */
+.scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: left;
+  z-index: 10001;
+  pointer-events: none;
+}
+
+/* ─── Memory notes (little paper cards under the carousel) ───────── */
+.memory-note {
+  position: relative;
+  flex: 0 0 auto;
+  width: 196px;
+  text-align: left;
+  background: #FFFDF7;
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  padding: 16px 14px 12px;
+  box-shadow: var(--shadow);
+  cursor: pointer;
+  font-family: 'Fraunces', Georgia, serif;
+  transition: box-shadow 400ms var(--ease-memorial),
+              translate 400ms var(--ease-memorial);
+}
+.memory-note:hover {
+  box-shadow: var(--shadow-lg);
+  translate: 0 -3px;
+}
+.memory-note-pin {
+  position: absolute;
+  top: -5px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--accent-soft);
+  border: 1px solid var(--accent);
+  box-shadow: 0 1px 2px rgba(60, 50, 38, 0.25);
+}
+.memory-note-body {
+  display: block;
+  font-size: 12.5px;
+  font-style: italic;
+  font-weight: 300;
+  line-height: 1.55;
+  color: var(--fg-soft);
+}
+.memory-note-author {
+  display: block;
+  margin-top: 8px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+.memory-note-more {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: auto;
+  min-width: 120px;
+  background: transparent;
+  border-style: dashed;
+}
+@media (max-width: 768px) {
+  .memory-note { width: 168px; padding: 14px 12px 10px; }
 }
 
 /* ─── Reduced motion ─────────────────────────────────────────────── */

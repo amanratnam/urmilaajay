@@ -1,12 +1,7 @@
 import "server-only";
 import { unstable_cache } from "next/cache";
-import { getSupabaseAdmin, PHOTO_BUCKET } from "./supabase/admin";
+import { getSupabaseAdmin } from "./supabase/admin";
 import { Photo, PhotoSubject } from "@/types";
-
-// Signed URLs live for 7 days; the data cache below revalidates hourly (or on
-// admin mutation via revalidateTag("photos")), so URLs stay stable & valid
-// within each cache window while never being publicly guessable.
-const SIGNED_URL_TTL = 60 * 60 * 24 * 7;
 
 interface PhotoRow {
   id: string;
@@ -31,22 +26,13 @@ async function fetchPhotos(): Promise<Photo[]> {
 
   if (error || !data || data.length === 0) return [];
 
-  const rows = data as PhotoRow[];
-  const paths = rows.map((r) => r.storage_path);
-
-  const { data: signed } = await supabase.storage
-    .from(PHOTO_BUCKET)
-    .createSignedUrls(paths, SIGNED_URL_TTL);
-
-  const urlByPath = new Map(
-    (signed ?? []).map((s) => [s.path ?? "", s.signedUrl])
-  );
-
-  return rows.map((r) => ({
+  return (data as PhotoRow[]).map((r) => ({
     id: r.id,
     slug: r.id,
     storagePath: r.storage_path,
-    src: urlByPath.get(r.storage_path) ?? "",
+    // Stable internal URL — /api/img/[id] redirects to a freshly signed
+    // Supabase URL on demand, so cached pages never hold expired tokens.
+    src: `/api/img/${r.id}`,
     caption: r.caption ?? "",
     year: r.year ?? 0,
     subject: (r.subject as PhotoSubject) ?? "urmila",
@@ -56,11 +42,21 @@ async function fetchPhotos(): Promise<Photo[]> {
   }));
 }
 
-// Cached wrapper — stable signed URLs within the revalidation window.
+// revalidate: false — the public photo list only refreshes when the admin
+// presses "Resync All Photos" (or edits/deletes, which revalidate the tag).
 export const getPhotos = unstable_cache(fetchPhotos, ["photos-list"], {
-  revalidate: 3600,
+  revalidate: false,
   tags: ["photos"],
 });
+
+/** Storage-path lookup for the /api/img redirect route (cached via getPhotos). */
+export async function getPhotoMetaById(
+  id: string
+): Promise<{ storagePath: string } | null> {
+  const photos = await getPhotos();
+  const photo = photos.find((p) => p.id === id);
+  return photo ? { storagePath: photo.storagePath } : null;
+}
 
 export async function getPhotoBySlug(slug: string): Promise<Photo | undefined> {
   const photos = await getPhotos();

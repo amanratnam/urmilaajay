@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { PersonalLetterForm } from "@/components/footer/PersonalLetterForm";
+import { CharReveal } from "@/components/ui/CharReveal";
 import { MemorialIllustration } from "./MemorialIllustration";
 import { useIsMobile } from "@/hooks/useMediaQuery";
 
@@ -43,10 +44,10 @@ export function FooterSection() {
       style={{
         background: "var(--bg-deep)",
         borderTop: "1px solid var(--border)",
-        padding: isMobile ? "72px 24px 36px" : "112px 40px 56px",
+        padding: isMobile ? "56px 24px 28px" : "80px 40px 40px",
         display: "flex",
         flexDirection: "column",
-        gap: isMobile ? 64 : 92,
+        gap: isMobile ? 44 : 56,
         perspective: "1000px",
         opacity: 0,
       }}
@@ -60,7 +61,7 @@ export function FooterSection() {
           maxWidth: 720,
           width: "100%",
           margin: "0 auto",
-          paddingTop: isMobile ? 36 : 64,
+          paddingTop: isMobile ? 28 : 44,
           borderTop: "1px solid var(--border)",
           display: "flex",
           flexDirection: "column",
@@ -83,7 +84,7 @@ export function FooterSection() {
             maxWidth: 520,
           }}
         >
-          Two souls who took flight, three hearts still keeping their light.
+          <CharReveal text="Two souls who took flight, three hearts still keeping their light." />
         </p>
 
         <h2

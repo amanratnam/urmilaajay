@@ -12,23 +12,42 @@ interface PanelDef {
   eyebrow: string;
   lead: string;
   emph: string;
-  tail?: string;
 }
 
+// Mostly about mom — with dad held close.
 const PANELS: PanelDef[] = [
-  { eyebrow: "first", lead: "You were our", emph: "beginning." },
-  { eyebrow: "always", lead: "You taught us how to", emph: "love." },
-  { eyebrow: "forever", lead: "We'll love you,", emph: "always." },
+  { eyebrow: "mom", lead: "She was our", emph: "beginning." },
+  { eyebrow: "her love", lead: "She taught us how to", emph: "love." },
+  { eyebrow: "dad", lead: "He showed us how to be", emph: "strong." },
+  { eyebrow: "forever", lead: "We'll love you both,", emph: "always." },
 ];
 
 interface Props {
   photo: Photo | null;
 }
 
+/** Split a string into per-character spans GSAP can stagger. */
+function Chars({ text, className }: { text: string; className?: string }) {
+  return (
+    <span className={className} aria-label={text}>
+      {text.split(" ").map((word, wi, arr) => (
+        <span key={wi} aria-hidden style={{ display: "inline-block", whiteSpace: "nowrap" }}>
+          {Array.from(word).map((ch, ci) => (
+            <span key={ci} className="pp-char" style={{ display: "inline-block" }}>
+              {ch}
+            </span>
+          ))}
+          {wi < arr.length - 1 && <span>&nbsp;</span>}
+        </span>
+      ))}
+    </span>
+  );
+}
+
 /**
- * Pinned scroll section: the page sticks while three statement panels
- * cross-fade through (scrub-driven by ScrollTrigger), with a subtle photo
- * parallax in the background. Replaces the older Interstitial.
+ * Pinned scroll section: the page holds still while four statements write
+ * themselves in, character by character, scrub-driven — with mom's photo
+ * breathing gently behind them.
  */
 export function PinnedSection({ photo }: Props) {
   const sectionRef = useRef<HTMLElement>(null);
@@ -42,44 +61,68 @@ export function PinnedSection({ photo }: Props) {
       const panels = section.querySelectorAll<HTMLElement>(".pinned-panel");
       if (panels.length === 0) return;
 
-      // Pin the whole section while we scrub through the panels.
+      const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+      // ~0.65 viewport of scroll per statement — present, not endless.
+      const pinDistance = () => panels.length * 0.65 * window.innerHeight;
+
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: section,
           start: "top top",
-          end: () => `+=${(panels.length + 0.5) * window.innerHeight}`,
+          end: () => `+=${pinDistance()}`,
           pin: true,
-          scrub: 1,
+          scrub: reduced ? false : 0.8,
         },
       });
 
       panels.forEach((p, i) => {
-        if (i > 0) {
-          tl.to(panels[i - 1], { opacity: 0, y: -40, duration: 0.4, ease: "power2.in" });
-        }
-        tl.fromTo(
-          p,
-          { opacity: 0, y: 40 },
-          { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" },
-          i === 0 ? "+=0" : "<+0.05"
-        );
-        tl.to({}, { duration: 0.6 }); // hold
-      });
-      tl.to(panels[panels.length - 1], { opacity: 0, y: -40, duration: 0.4, ease: "power2.in" });
+        const eyebrow = p.querySelector(".pinned-eyebrow");
+        const chars = p.querySelectorAll(".pp-char");
 
-      // Subtle photo parallax through the pinned scroll
-      if (photoRef.current) {
+        if (i > 0) {
+          tl.to(panels[i - 1], { opacity: 0, y: -36, duration: 0.35, ease: "power2.in" });
+        }
+        tl.set(p, { opacity: 1 });
+        if (eyebrow) {
+          tl.fromTo(
+            eyebrow,
+            { opacity: 0, letterSpacing: "0.55em" },
+            { opacity: 1, letterSpacing: "0.26em", duration: 0.4, ease: "power2.out" },
+            i === 0 ? "+=0" : "<+0.05"
+          );
+        }
+        // Characters write themselves in as you scroll.
+        tl.fromTo(
+          chars,
+          { opacity: 0, y: "0.5em", filter: "blur(4px)" },
+          {
+            opacity: 1,
+            y: 0,
+            filter: "blur(0px)",
+            duration: 0.5,
+            ease: "power2.out",
+            stagger: { each: 0.018 },
+          },
+          "<"
+        );
+        tl.to({}, { duration: 0.45 }); // hold so the line can land
+      });
+      tl.to(panels[panels.length - 1], { opacity: 0, y: -36, duration: 0.35, ease: "power2.in" });
+
+      // Photo parallax: slow drift + gentle zoom through the whole pin.
+      if (photoRef.current && !reduced) {
         gsap.fromTo(
           photoRef.current,
-          { yPercent: -6, scale: 1.05 },
+          { yPercent: -8, scale: 1.06 },
           {
-            yPercent: 6,
-            scale: 1.12,
+            yPercent: 8,
+            scale: 1.16,
             ease: "none",
             scrollTrigger: {
               trigger: section,
               start: "top top",
-              end: () => `+=${(panels.length + 0.5) * window.innerHeight}`,
+              end: () => `+=${pinDistance()}`,
               scrub: 1,
             },
           }
@@ -107,7 +150,7 @@ export function PinnedSection({ photo }: Props) {
           ref={photoRef}
           style={{
             position: "absolute",
-            inset: "-6% 0",
+            inset: "-8% 0",
             zIndex: 0,
           }}
         >
@@ -139,7 +182,7 @@ export function PinnedSection({ photo }: Props) {
         </div>
       )}
 
-      {/* Stacked panels — GSAP cross-fades through them */}
+      {/* Stacked panels — GSAP writes each statement in, then lets it go */}
       <div
         style={{
           position: "absolute",
@@ -164,15 +207,16 @@ export function PinnedSection({ photo }: Props) {
             }}
           >
             <span
-              className="hero-eyebrow"
-              style={{ display: "block", marginBottom: 32 }}
+              className="hero-eyebrow pinned-eyebrow"
+              style={{ display: "block", marginBottom: 28 }}
             >
               {p.eyebrow}
             </span>
             <h2 className="pinned-statement">
-              <span className="w-200">{p.lead}</span>{" "}
-              <em>{p.emph}</em>
-              {p.tail && <span className="w-200"> {p.tail}</span>}
+              <Chars text={p.lead} className="w-200" />{" "}
+              <em>
+                <Chars text={p.emph} />
+              </em>
             </h2>
           </div>
         ))}
