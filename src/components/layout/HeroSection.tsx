@@ -1,9 +1,13 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import Image from "next/image";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Photo } from "@/types";
 import { useIsMobile } from "@/hooks/useMediaQuery";
+
+gsap.registerPlugin(ScrollTrigger);
 
 interface Props {
   photos: Photo[];
@@ -12,9 +16,37 @@ interface Props {
 /**
  * Split hero: heartfelt copy on the left, two vertically auto-scrolling
  * photo marquees on the right. Mobile: text first, single marquee beneath.
+ * Text and photos drift apart at different speeds on scroll (parallax).
  */
 export function HeroSection({ photos }: Props) {
   const isMobile = useIsMobile();
+  const sectionRef = useRef<HTMLElement>(null);
+  const textRef = useRef<HTMLDivElement>(null);
+  const marqueeWrapRef = useRef<HTMLDivElement>(null);
+
+  // Parallax: as the hero scrolls away, the copy lifts faster than the
+  // photo columns, giving the section physical depth.
+  useEffect(() => {
+    const section = sectionRef.current;
+    if (!section) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    const ctx = gsap.context(() => {
+      const trigger = {
+        trigger: section,
+        start: "top top",
+        end: "bottom top",
+        scrub: 0.8,
+      };
+      if (textRef.current) {
+        gsap.fromTo(textRef.current, { yPercent: 0, opacity: 1 }, { yPercent: -14, opacity: 0.25, ease: "none", scrollTrigger: trigger });
+      }
+      if (marqueeWrapRef.current) {
+        gsap.fromTo(marqueeWrapRef.current, { yPercent: 0 }, { yPercent: 8, ease: "none", scrollTrigger: trigger });
+      }
+    }, section);
+    return () => ctx.revert();
+  }, []);
 
   // Pick photos for the marquees — spread across the archive
   const pool = useMemo(() => (photos.length > 0 ? photos.slice(0, Math.min(photos.length, 14)) : []), [photos]);
@@ -23,6 +55,7 @@ export function HeroSection({ photos }: Props) {
 
   return (
     <section
+      ref={sectionRef}
       style={{
         position: "relative",
         minHeight: "100svh",
@@ -36,6 +69,7 @@ export function HeroSection({ photos }: Props) {
     >
       {/* ── LEFT — text ─────────────────────────────────────────────── */}
       <div
+        ref={textRef}
         style={{
           display: "flex",
           flexDirection: "column",
@@ -94,6 +128,7 @@ export function HeroSection({ photos }: Props) {
 
       {/* ── RIGHT — vertical marquees ───────────────────────────────── */}
       <div
+        ref={marqueeWrapRef}
         style={{
           position: "relative",
           height: isMobile ? "58svh" : "100svh",
@@ -104,8 +139,8 @@ export function HeroSection({ photos }: Props) {
           padding: isMobile ? "0 16px 24px" : "24px 5vw 24px 0",
         }}
       >
-        <MarqueeColumn photos={colA} direction="up" duration={isMobile ? 42 : 58} />
-        <MarqueeColumn photos={colB} direction="down" duration={isMobile ? 50 : 72} offset={isMobile ? 40 : 64} />
+        <MarqueeColumn photos={colA} direction="up" speed={isMobile ? 38 : 30} delay={0.5} />
+        <MarqueeColumn photos={colB} direction="down" speed={isMobile ? 32 : 24} offset={isMobile ? 40 : 64} delay={0.7} />
 
         {/* Soft top + bottom fades into bg */}
         <div
@@ -119,6 +154,12 @@ export function HeroSection({ photos }: Props) {
           }}
         />
       </div>
+
+      {/* ── Scroll cue ──────────────────────────────────────────────── */}
+      <div className="hero-scroll-cue" aria-hidden>
+        <span className="hero-scroll-cue-label">scroll through their story</span>
+        <span className="hero-scroll-cue-line" />
+      </div>
     </section>
   );
 }
@@ -126,29 +167,82 @@ export function HeroSection({ photos }: Props) {
 interface MarqueeProps {
   photos: Photo[];
   direction: "up" | "down";
-  duration: number;
+  /** Base drift in px/s. */
+  speed: number;
   offset?: number;
+  /** Entrance-reveal delay in seconds. */
+  delay?: number;
 }
 
-function MarqueeColumn({ photos, direction, duration, offset = 0 }: MarqueeProps) {
-  // Duplicate the list so the animation can loop seamlessly (0 → -50%)
+/**
+ * rAF-driven vertical marquee. Drifts at `speed` and gently accelerates
+ * with scroll velocity, so the columns feel alive instead of mechanical.
+ * Loops seamlessly via modulo on the duplicated track's half-height.
+ */
+function MarqueeColumn({ photos, direction, speed, offset = 0, delay = 0 }: MarqueeProps) {
+  const trackRef = useRef<HTMLDivElement>(null);
+  // Duplicate the list so the loop can wrap seamlessly at the halfway point
   const items = [...photos, ...photos];
+
+  useEffect(() => {
+    const track = trackRef.current;
+    if (!track || photos.length === 0) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    const dir = direction === "up" ? 1 : -1;
+    let raf = 0;
+    let pos = 0;
+    let last = performance.now();
+    let lastScrollY = window.scrollY;
+    let boost = 0; // smoothed scroll-velocity influence
+
+    const tick = (now: number) => {
+      const dt = Math.min((now - last) / 1000, 0.05);
+      last = now;
+
+      // Scroll gives the columns a push: faster while the visitor scrolls
+      // down, easing back to the base drift when they stop. Capped so a
+      // hard upward fling slows but never fully reverses the motion.
+      const sy = window.scrollY;
+      const velocity = dt > 0 ? (sy - lastScrollY) / dt : 0;
+      lastScrollY = sy;
+      const target = Math.max(-0.6, Math.min(2.5, velocity / 800));
+      boost += (target - boost) * Math.min(1, dt * 5);
+
+      pos += dir * speed * (1 + boost) * dt;
+
+      const half = track.scrollHeight / 2;
+      if (half > 0) {
+        const y = ((pos % half) + half) % half;
+        track.style.transform = `translate3d(0, ${-y.toFixed(2)}px, 0)`;
+      }
+      raf = requestAnimationFrame(tick);
+    };
+
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [direction, speed, photos.length]);
+
   if (photos.length === 0) return <div />;
 
   return (
-    <div style={{ position: "relative", overflow: "hidden", paddingTop: offset }}>
+    <div
+      className="marquee-col"
+      style={{ position: "relative", overflow: "hidden", paddingTop: offset, animationDelay: `${delay}s` }}
+    >
       <div
+        ref={trackRef}
         style={{
           display: "flex",
           flexDirection: "column",
           gap: 14,
-          animation: `${direction === "up" ? "marquee-up" : "marquee-down"} ${duration}s linear infinite`,
           willChange: "transform",
         }}
       >
         {items.map((p, i) => (
           <div
             key={`${p.id}-${i}`}
+            className="marquee-item"
             style={{
               position: "relative",
               width: "100%",

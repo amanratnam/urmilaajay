@@ -25,6 +25,7 @@ export function AdminPhotos() {
   const [photos, setPhotos] = useState<AdminPhoto[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
+  const [syncing, setSyncing] = useState(false);
   const [dragOver, setDragOver] = useState(false);
   const [msg, setMsg] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
@@ -114,6 +115,27 @@ export function AdminPhotos() {
     load();
   };
 
+  const resync = async () => {
+    setSyncing(true);
+    setMsg("");
+    try {
+      const res = await fetch("/api/admin/photos/resync", {
+        method: "POST",
+        headers: { "x-admin-password": pw() },
+      });
+      if (res.ok) {
+        setMsg("All photos resynced — the website now shows the latest set.");
+      } else {
+        const d = await res.json().catch(() => ({}));
+        setMsg(d.error || "Resync failed.");
+      }
+    } catch {
+      setMsg("Resync failed.");
+    } finally {
+      setSyncing(false);
+    }
+  };
+
   const remove = async (id: string) => {
     if (!confirm("Delete this photo permanently? This cannot be undone.")) return;
     setPhotos((prev) => prev.filter((p) => p.id !== id));
@@ -127,7 +149,30 @@ export function AdminPhotos() {
     <div>
       <div style={headerRow}>
         <h2 style={h2Style}>Photos</h2>
-        <span style={metaStyle}>{photos.length} total</span>
+        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+          <span style={metaStyle}>{photos.length} total</span>
+          <button
+            onClick={resync}
+            disabled={syncing}
+            title="Publish the current photo set to the public website"
+            style={{
+              fontFamily: "Outfit, sans-serif",
+              fontSize: 11,
+              fontWeight: 500,
+              letterSpacing: "0.14em",
+              textTransform: "uppercase",
+              padding: "9px 16px",
+              borderRadius: 999,
+              border: "1px solid var(--accent)",
+              background: syncing ? "transparent" : "var(--accent)",
+              color: syncing ? "var(--accent)" : "var(--bg)",
+              cursor: syncing ? "default" : "pointer",
+              transition: "background 0.3s, color 0.3s",
+            }}
+          >
+            {syncing ? "Resyncing…" : "Resync All Photos"}
+          </button>
+        </div>
       </div>
 
       {/* Upload dropzone */}
@@ -152,7 +197,7 @@ export function AdminPhotos() {
           {uploading ? "Uploading…" : "Drop photos here, or click to choose"}
         </p>
         <p style={{ fontFamily: "Outfit, sans-serif", fontSize: 11, color: "var(--fg-muted)", margin: 0 }}>
-          JPG / PNG / WebP · up to 25 MB · blur + dimensions generated automatically
+          JPG / PNG / WebP · up to 25 MB · new uploads go live after &ldquo;Resync All Photos&rdquo;
         </p>
       </div>
 

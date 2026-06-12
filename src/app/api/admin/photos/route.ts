@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdmin, PHOTO_BUCKET } from "@/lib/supabase/admin";
-import { revalidateTag } from "next/cache";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -121,6 +120,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: `Save failed: ${dbErr.message}` }, { status: 500 });
   }
 
-  revalidateTag("photos");
+  // Intentionally no revalidateTag here — new uploads stay admin-only until
+  // "Resync All Photos" (POST /api/admin/photos/resync) publishes them.
   return NextResponse.json({ ok: true }, { status: 201 });
 }

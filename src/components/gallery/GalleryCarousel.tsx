@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState, useCallback, useEffect, useRef } from "react";
+import { motion, AnimatePresence, PanInfo } from "framer-motion";
 import Image from "next/image";
 import { Photo } from "@/types";
 import { MemoriesPanel } from "./MemoriesPanel";
@@ -13,6 +13,13 @@ interface Props {
   id?: string;
 }
 
+interface ApprovedComment {
+  id: string;
+  author_name: string;
+  body: string;
+  created_at: string;
+}
+
 const ease = [0.22, 1, 0.36, 1] as const;
 
 function subjectLabel(s: string) {
@@ -22,10 +29,14 @@ function subjectLabel(s: string) {
   return "Urmila";
 }
 
+const NOTE_TILTS = [-2.6, 2.2, -1.4, 2.8, -2.1];
+
 export function GalleryCarousel({ photos, counts = {}, id }: Props) {
   const isMobile = useIsMobile();
   const [active, setActive] = useState(0);
   const [panelOpen, setPanelOpen] = useState(false);
+  const [memories, setMemories] = useState<ApprovedComment[]>([]);
+  const memCache = useRef(new Map<string, ApprovedComment[]>());
   const count = photos.length;
 
   const go = useCallback(
@@ -50,6 +61,49 @@ export function GalleryCarousel({ photos, counts = {}, id }: Props) {
     return () => window.removeEventListener("keydown", onKey);
   }, [go, panelOpen]);
 
+  // Load approved memories for the active photo (cached per photo).
+  const activeId = photos[active]?.id;
+  const activeMemCount = activeId ? counts[activeId] ?? 0 : 0;
+  useEffect(() => {
+    if (!activeId || activeMemCount === 0) {
+      setMemories([]);
+      return;
+    }
+    const cached = memCache.current.get(activeId);
+    if (cached) {
+      setMemories(cached);
+      return;
+    }
+    setMemories([]);
+    const ctrl = new AbortController();
+    const timer = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/comments?photo_id=${encodeURIComponent(activeId)}`, {
+          signal: ctrl.signal,
+        });
+        const data = await res.json();
+        const list: ApprovedComment[] = data.comments ?? [];
+        memCache.current.set(activeId, list);
+        setMemories(list);
+      } catch {
+        /* aborted or offline — panel still offers the full list */
+      }
+    }, 250);
+    return () => {
+      ctrl.abort();
+      clearTimeout(timer);
+    };
+  }, [activeId, activeMemCount]);
+
+  const onDragEnd = useCallback(
+    (_: unknown, info: PanInfo) => {
+      const { offset, velocity } = info;
+      if (offset.x < -60 || velocity.x < -400) go(1);
+      else if (offset.x > 60 || velocity.x > 400) go(-1);
+    },
+    [go]
+  );
+
   if (count === 0) {
     return (
       <section id={id} style={{ padding: "120px 48px", textAlign: "center", background: "var(--bg)" }}>
@@ -64,17 +118,15 @@ export function GalleryCarousel({ photos, counts = {}, id }: Props) {
   const activeAr = activePhoto.aspectRatio || 1;
   const activePortrait = activeAr < 1;
 
-  // Larger images on desktop (per request). Mobile uses vw so the active
-  // image fills more of the viewport horizontally.
   const widthVal = isMobile ? (activePortrait ? 68 : 92) : activePortrait ? 38 : 60;
   const widthUnit = isMobile ? "vw" : "vh";
   const stageHeight = `${(widthVal / activeAr).toFixed(1)}${widthUnit}`;
 
   const memCount = counts[activePhoto.id] ?? 0;
   const spread = isMobile ? 54 : 50;
-
-  // Slide-left offset (desktop) — empty on mobile (bottom-sheet instead)
   const stageShiftX = panelOpen && !isMobile ? "-22%" : "0%";
+
+  const captionWords = (activePhoto.caption || subjectLabel(activePhoto.subject)).split(" ");
 
   return (
     <section
@@ -82,14 +134,14 @@ export function GalleryCarousel({ photos, counts = {}, id }: Props) {
       style={{
         position: "relative",
         background: "var(--bg)",
-        padding: isMobile ? "72px 0 96px" : "112px 0 128px",
+        padding: isMobile ? "48px 0 64px" : "72px 0 84px",
         overflow: "hidden",
       }}
     >
       {/* ── Section header w/ position counter ───────────────────────── */}
       <div
         style={{
-          padding: isMobile ? "0 24px 36px" : "0 56px 56px",
+          padding: isMobile ? "0 24px 24px" : "0 56px 32px",
           display: "flex",
           alignItems: "baseline",
           justifyContent: "space-between",
@@ -157,10 +209,15 @@ export function GalleryCarousel({ photos, counts = {}, id }: Props) {
         </div>
       </div>
 
-      {/* ── Coverflow stage ─────────────────────────────────────────── */}
+      {/* ── Coverflow stage (swipeable on touch) ────────────────────── */}
       <motion.div
         animate={{ height: stageHeight, x: stageShiftX }}
         transition={{ duration: 0.7, ease }}
+        drag={isMobile && !panelOpen ? "x" : false}
+        dragConstraints={{ left: 0, right: 0 }}
+        dragElastic={0.12}
+        dragSnapToOrigin
+        onDragEnd={onDragEnd}
         style={{
           position: "relative",
           height: stageHeight,
@@ -168,6 +225,7 @@ export function GalleryCarousel({ photos, counts = {}, id }: Props) {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
+          touchAction: "pan-y",
         }}
         onContextMenu={(e) => e.preventDefault()}
       >
@@ -299,16 +357,15 @@ export function GalleryCarousel({ photos, counts = {}, id }: Props) {
         )}
       </motion.div>
 
-      {/* ── Caption + meta beneath ──────────────────────────────────── */}
+      {/* ── Caption (word-by-word reveal) + meta ────────────────────── */}
       <AnimatePresence mode="wait">
         <motion.div
           key={`cap-${active}-${panelOpen}`}
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: panelOpen ? 0 : 1, y: 0 }}
-          exit={{ opacity: 0, y: -6 }}
-          transition={{ duration: 0.45, ease }}
+          initial={{ opacity: 1 }}
+          animate={{ opacity: panelOpen ? 0 : 1 }}
+          exit={{ opacity: 0, y: -6, transition: { duration: 0.25 } }}
           style={{
-            marginTop: isMobile ? 22 : 32,
+            marginTop: isMobile ? 18 : 24,
             textAlign: "center",
             display: "flex",
             flexDirection: "column",
@@ -330,10 +387,24 @@ export function GalleryCarousel({ photos, counts = {}, id }: Props) {
               margin: 0,
             }}
           >
-            {activePhoto.caption || subjectLabel(activePhoto.subject)}
+            {captionWords.map((word, i) => (
+              <motion.span
+                key={`${active}-${i}`}
+                initial={{ opacity: 0, y: 10, filter: "blur(3px)" }}
+                animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                transition={{ duration: 0.55, delay: 0.12 + i * 0.035, ease }}
+                style={{ display: "inline-block", whiteSpace: "pre" }}
+              >
+                {word}
+                {i < captionWords.length - 1 ? " " : ""}
+              </motion.span>
+            ))}
           </p>
 
-          <span
+          <motion.span
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
             style={{
               fontFamily: "Outfit, sans-serif",
               fontSize: 10,
@@ -345,7 +416,56 @@ export function GalleryCarousel({ photos, counts = {}, id }: Props) {
           >
             {subjectLabel(activePhoto.subject)}
             {activePhoto.year ? ` · ${activePhoto.year}` : ""}
-          </span>
+          </motion.span>
+
+          {/* ── Memories as little paper notes ──────────────────────── */}
+          {memories.length > 0 && (
+            <div
+              style={{
+                marginTop: isMobile ? 14 : 20,
+                display: "flex",
+                gap: isMobile ? 12 : 16,
+                maxWidth: "100%",
+                overflowX: "auto",
+                padding: "10px 24px 16px",
+                justifyContent: memories.length <= 2 ? "center" : "flex-start",
+                WebkitOverflowScrolling: "touch",
+                scrollbarWidth: "none",
+              }}
+            >
+              {memories.slice(0, 6).map((m, i) => (
+                <motion.button
+                  key={m.id}
+                  initial={{ opacity: 0, y: 18, rotate: 0 }}
+                  animate={{ opacity: 1, y: 0, rotate: NOTE_TILTS[i % NOTE_TILTS.length] }}
+                  transition={{ duration: 0.6, delay: 0.35 + i * 0.1, ease }}
+                  onClick={() => setPanelOpen(true)}
+                  data-cursor="memories"
+                  className="memory-note"
+                  aria-label={`Memory from ${m.author_name}`}
+                >
+                  <span className="memory-note-pin" aria-hidden />
+                  <span className="memory-note-body">
+                    {m.body.length > 110 ? `${m.body.slice(0, 110).trimEnd()}…` : m.body}
+                  </span>
+                  <span className="memory-note-author">— {m.author_name}</span>
+                </motion.button>
+              ))}
+              {memCount > 6 && (
+                <motion.button
+                  initial={{ opacity: 0, y: 18 }}
+                  animate={{ opacity: 1, y: 0, rotate: 1.8 }}
+                  transition={{ duration: 0.6, delay: 0.35 + 6 * 0.1, ease }}
+                  onClick={() => setPanelOpen(true)}
+                  className="memory-note memory-note-more"
+                >
+                  <span className="memory-note-body">
+                    +{memCount - 6} more {memCount - 6 === 1 ? "memory" : "memories"}
+                  </span>
+                </motion.button>
+              )}
+            </div>
+          )}
         </motion.div>
       </AnimatePresence>
 

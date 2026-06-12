@@ -3,6 +3,7 @@
 import { useState, useRef, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Owl } from "./Owl";
+import { CharReveal } from "@/components/ui/CharReveal";
 import { useIsMobile } from "@/hooks/useMediaQuery";
 
 const ease = [0.22, 1, 0.36, 1] as const;
@@ -122,7 +123,10 @@ export function PersonalLetterForm() {
           lineHeight: 1.05,
         }}
       >
-        Write to <em style={{ fontWeight: 400, fontStyle: "italic", color: "var(--accent)" }}>us</em>
+        <CharReveal text="Write to" />{" "}
+        <em style={{ fontWeight: 400, fontStyle: "italic", color: "var(--accent)" }}>
+          <CharReveal text="us" />
+        </em>
       </h2>
       <p
         style={{
