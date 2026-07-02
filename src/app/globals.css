@@ -268,12 +268,18 @@ img {
   color: var(--accent);
 }
 .hero-display {
-  font-family: 'Outfit', sans-serif;
+  font-family: 'Fraunces', Georgia, serif;
+  font-weight: 300;
   font-size: clamp(54px, 6.5vw, 104px);
-  line-height: 1.02;
-  letter-spacing: -0.025em;
+  line-height: 1.04;
+  letter-spacing: -0.02em;
   color: var(--fg);
   margin: 0;
+}
+.hero-display .hero-amp {
+  font-style: italic;
+  font-weight: 300;
+  color: var(--accent);
 }
 .hero-display .hero-years {
   font-family: 'Outfit', sans-serif;
@@ -366,17 +372,18 @@ img {
 
 /* ─── Pinned statement panels ────────────────────────────────────── */
 .pinned-statement {
-  font-family: 'Outfit', sans-serif;
+  font-family: 'Fraunces', Georgia, serif;
+  font-weight: 300;
   font-size: clamp(40px, 6.5vw, 96px);
-  line-height: 1.08;
-  letter-spacing: -0.02em;
+  line-height: 1.1;
+  letter-spacing: -0.015em;
   color: var(--fg);
   margin: 0;
 }
 .pinned-statement em {
-  font-family: 'Outfit', sans-serif;
+  font-family: 'Fraunces', Georgia, serif;
   font-style: italic;
-  font-weight: 900;
+  font-weight: 500;
   color: var(--accent);
 }
 
@@ -455,6 +462,58 @@ img {
 }
 @media (max-width: 768px) {
   .memory-note { width: 168px; padding: 14px 12px 10px; }
+}
+
+/* ─── Letter paper (the form sits on real stationery) ────────────── */
+.letter-paper {
+  position: relative;
+  background:
+    linear-gradient(180deg, #FFFDF8 0%, #FBF6EC 100%);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  box-shadow:
+    0 1px 2px rgba(60, 50, 38, 0.05),
+    0 14px 44px rgba(60, 50, 38, 0.12);
+  padding: 52px 44px 44px;
+  transform: rotate(-0.4deg);
+}
+.letter-paper::after {
+  /* faint fold line across the middle of the sheet */
+  content: "";
+  position: absolute;
+  left: 6%;
+  right: 6%;
+  top: 55%;
+  height: 1px;
+  background: linear-gradient(to right, transparent, rgba(139, 110, 63, 0.09), transparent);
+  pointer-events: none;
+}
+@media (max-width: 768px) {
+  .letter-paper { padding: 44px 22px 32px; transform: rotate(0deg); }
+}
+
+/* Wax seal resting on the top edge of the letter */
+.wax-seal {
+  position: absolute;
+  top: -26px;
+  left: 50%;
+  transform: translateX(-50%) rotate(-6deg);
+  width: 52px;
+  height: 52px;
+  pointer-events: none;
+  filter: drop-shadow(0 3px 6px rgba(60, 50, 38, 0.25));
+}
+
+/* ─── Breathing photograph (the print floats in its mat) ─────────── */
+@keyframes photoBreathe {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.014); }
+}
+.photo-breathe {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  animation: photoBreathe 9s ease-in-out infinite;
 }
 
 /* ─── Reduced motion ─────────────────────────────────────────────── */

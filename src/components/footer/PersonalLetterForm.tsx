@@ -103,13 +103,16 @@ export function PersonalLetterForm() {
     <div
       id="memories"
       style={{
-        maxWidth: 640,
+        maxWidth: 680,
+        width: "100%",
         margin: "0 auto",
-        padding: "0 24px",
+        padding: isMobile ? "26px 8px 0" : "26px 24px 0",
         textAlign: "center",
       }}
     >
-      <span className="hero-eyebrow" style={{ display: "block", marginBottom: 12 }}>
+      <div className="letter-paper">
+        <WaxSeal />
+        <span className="hero-eyebrow" style={{ display: "block", marginBottom: 12 }}>
         A letter
       </span>
       <h2
@@ -295,8 +298,11 @@ export function PersonalLetterForm() {
           </motion.form>
         )}
       </AnimatePresence>
+      </div>
 
-      {/* ── Flying owl rendered at the button's centre ──────────────── */}
+      {/* ── Flying owl rendered at the button's centre ────────────────
+           Kept OUTSIDE .letter-paper: the paper's transform would turn
+           it into the containing block for this fixed-position owl. */}
       <AnimatePresence>
         {phase === "flying" && owlAnchor && (
           <motion.div
@@ -397,6 +403,40 @@ function Field({
         </span>
       )}
     </label>
+  );
+}
+
+/** Decorative wax seal resting on the letter's top edge — an "&" pressed in wax. */
+function WaxSeal() {
+  return (
+    <svg className="wax-seal" viewBox="0 0 52 52" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+      <defs>
+        <radialGradient id="waxG" cx="0.38" cy="0.34" r="0.85">
+          <stop offset="0%" stopColor="#B08262" />
+          <stop offset="55%" stopColor="#9C6B54" />
+          <stop offset="100%" stopColor="#7E5342" />
+        </radialGradient>
+      </defs>
+      {/* irregular wax blob */}
+      <path
+        d="M26 2 C 36 1, 47 8, 49 19 C 51 29, 47 40, 38 46 C 30 51, 18 51, 11 45 C 4 39, 1 30, 3 20 C 5 9, 15 3, 26 2 Z"
+        fill="url(#waxG)"
+      />
+      {/* pressed inner ring */}
+      <circle cx="26" cy="26" r="16" fill="none" stroke="#F3E5D2" strokeOpacity="0.5" strokeWidth="1.3" />
+      <text
+        x="26"
+        y="34"
+        textAnchor="middle"
+        fontFamily="Fraunces, Georgia, serif"
+        fontStyle="italic"
+        fontSize="22"
+        fill="#F3E5D2"
+        fillOpacity="0.85"
+      >
+        &amp;
+      </text>
+    </svg>
   );
 }
 

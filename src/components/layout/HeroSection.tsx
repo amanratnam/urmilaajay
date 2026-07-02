@@ -59,7 +59,7 @@ export function HeroSection({ photos }: Props) {
       style={{
         position: "relative",
         minHeight: "100svh",
-        background: "var(--bg)",
+        background: "transparent",
         overflow: "hidden",
         display: "grid",
         gridTemplateColumns: isMobile ? "1fr" : "1.05fr 1fr",
@@ -84,11 +84,11 @@ export function HeroSection({ photos }: Props) {
         </span>
 
         <h1 className="hero-display hero-reveal" style={{ animationDelay: "0.25s" }}>
-          <span className="w-300">Urmila</span>
+          <span>Urmila</span>
           <span className="hero-years">1980 – 2018</span>
           <br />
-          <span className="w-200">&amp;&nbsp;</span>
-          <span className="w-300">Ajay</span>
+          <span className="hero-amp">&amp;&nbsp;</span>
+          <span>Ajay</span>
           <span className="hero-years">1971 – 2021</span>
         </h1>
 
@@ -137,22 +137,16 @@ export function HeroSection({ photos }: Props) {
           gridTemplateColumns: isMobile ? "1fr 1fr" : "1fr 1fr",
           gap: isMobile ? 10 : 16,
           padding: isMobile ? "0 16px 24px" : "24px 5vw 24px 0",
+          // Fade the photo columns into the living sky behind them
+          // (a mask, not an overlay, so the atmosphere shows through).
+          WebkitMaskImage:
+            "linear-gradient(to bottom, transparent 0%, black 10%, black 90%, transparent 100%)",
+          maskImage:
+            "linear-gradient(to bottom, transparent 0%, black 10%, black 90%, transparent 100%)",
         }}
       >
         <MarqueeColumn photos={colA} direction="up" speed={isMobile ? 38 : 30} delay={0.5} />
         <MarqueeColumn photos={colB} direction="down" speed={isMobile ? 32 : 24} offset={isMobile ? 40 : 64} delay={0.7} />
-
-        {/* Soft top + bottom fades into bg */}
-        <div
-          aria-hidden
-          style={{
-            position: "absolute",
-            inset: 0,
-            pointerEvents: "none",
-            background:
-              "linear-gradient(to bottom, var(--bg) 0%, transparent 9%, transparent 91%, var(--bg) 100%)",
-          }}
-        />
       </div>
 
       {/* ── Scroll cue ──────────────────────────────────────────────── */}
