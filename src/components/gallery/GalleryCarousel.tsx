@@ -106,7 +106,7 @@ export function GalleryCarousel({ photos, counts = {}, id }: Props) {
 
   if (count === 0) {
     return (
-      <section id={id} style={{ padding: "120px 48px", textAlign: "center", background: "var(--bg)" }}>
+      <section id={id} style={{ padding: "120px 48px", textAlign: "center", background: "transparent" }}>
         <p style={{ fontFamily: "Fraunces, Georgia, serif", fontStyle: "italic", fontWeight: 300, color: "var(--fg-muted)" }}>
           The archive is being prepared.
         </p>
@@ -133,7 +133,7 @@ export function GalleryCarousel({ photos, counts = {}, id }: Props) {
       id={id}
       style={{
         position: "relative",
-        background: "var(--bg)",
+        background: "transparent",
         padding: isMobile ? "48px 0 64px" : "72px 0 84px",
         overflow: "hidden",
       }}
@@ -270,22 +270,26 @@ export function GalleryCarousel({ photos, counts = {}, id }: Props) {
                 transformStyle: "preserve-3d",
                 cursor: panelOpen && isActive ? "default" : "pointer",
                 zIndex,
-                boxShadow: isActive ? "var(--shadow-lg)" : "var(--shadow)",
-                background: "var(--bg-elevated)",
+                // A physical print: cream mat, hairline frame edge, warm shadow.
+                border: `${isMobile ? 5 : 9}px solid #FFFDF7`,
+                boxShadow: `0 0 0 1px rgba(139, 110, 63, 0.22), ${isActive ? "var(--shadow-lg)" : "var(--shadow)"}`,
+                background: "#FFFDF7",
                 overflow: "hidden",
-                borderRadius: 4,
+                borderRadius: 2,
               }}
             >
-              <Image
-                src={photo.src}
-                alt={photo.caption || `Urmila — ${photo.year}`}
-                fill
-                sizes="(max-width: 768px) 92vw, 60vh"
-                draggable={false}
-                placeholder={photo.blurDataURL ? "blur" : "empty"}
-                blurDataURL={photo.blurDataURL}
-                style={{ objectFit: "cover", pointerEvents: "none", userSelect: "none" }}
-              />
+              <div className="photo-breathe">
+                <Image
+                  src={photo.src}
+                  alt={photo.caption || `Urmila — ${photo.year}`}
+                  fill
+                  sizes="(max-width: 768px) 92vw, 60vh"
+                  draggable={false}
+                  placeholder={photo.blurDataURL ? "blur" : "empty"}
+                  blurDataURL={photo.blurDataURL}
+                  style={{ objectFit: "cover", pointerEvents: "none", userSelect: "none" }}
+                />
+              </div>
               <div style={{ position: "absolute", inset: 0, zIndex: 2 }} />
 
               {/* ── Share-a-memory button overlaid bottom-right ─────── */}

@@ -139,8 +139,10 @@ export function PinnedSection({ photo }: Props) {
       style={{
         position: "relative",
         height: "100svh",
-        overflow: "hidden",
-        background: "var(--bg)",
+        // No overflow clipping: the photo backdrop bleeds past the section
+        // and its mask fades it out, so there is never a hard edge.
+        overflow: "visible",
+        background: "transparent",
       }}
       onContextMenu={(e) => e.preventDefault()}
     >
@@ -152,6 +154,12 @@ export function PinnedSection({ photo }: Props) {
             position: "absolute",
             inset: "-8% 0",
             zIndex: 0,
+            // Fade the backdrop in and out vertically so the section has no
+            // hard boundary against the shared sky above and below it.
+            WebkitMaskImage:
+              "linear-gradient(to bottom, transparent 0%, black 18%, black 82%, transparent 100%)",
+            maskImage:
+              "linear-gradient(to bottom, transparent 0%, black 18%, black 82%, transparent 100%)",
           }}
         >
           <Image
@@ -176,7 +184,7 @@ export function PinnedSection({ photo }: Props) {
               position: "absolute",
               inset: 0,
               background:
-                "radial-gradient(ellipse 70% 60% at 50% 50%, rgba(250,249,246,0.55) 0%, rgba(250,249,246,0.85) 60%, rgba(250,249,246,1) 100%)",
+                "radial-gradient(ellipse 70% 60% at 50% 50%, rgba(250,249,246,0.55) 0%, rgba(250,249,246,0.82) 60%, rgba(250,249,246,0.92) 100%)",
             }}
           />
         </div>
@@ -213,7 +221,7 @@ export function PinnedSection({ photo }: Props) {
               {p.eyebrow}
             </span>
             <h2 className="pinned-statement">
-              <Chars text={p.lead} className="w-200" />{" "}
+              <Chars text={p.lead} />{" "}
               <em>
                 <Chars text={p.emph} />
               </em>

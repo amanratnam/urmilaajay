@@ -4,6 +4,8 @@ import { HeroSection } from "@/components/layout/HeroSection";
 import { PinnedSection } from "@/components/layout/PinnedSection";
 import { GalleryCarousel } from "@/components/gallery/GalleryCarousel";
 import { FooterSection } from "@/components/layout/FooterSection";
+import { Atmosphere } from "@/components/world/Atmosphere";
+import { MomentDivider } from "@/components/world/Moments";
 import { getPhotos } from "@/lib/photos";
 import { getApprovedCommentCounts } from "@/lib/comments";
 
@@ -21,11 +23,16 @@ export default async function Home() {
 
   return (
     <SmoothScrollProvider>
+      {/* The living sky behind everything — sunrise to dusk as you scroll */}
+      <Atmosphere />
       <Nav />
-      <main>
+      <main style={{ position: "relative", zIndex: 1 }}>
         <HeroSection photos={photos} />
+        <MomentDivider scene="walk" />
         <PinnedSection photo={pinnedPhoto} />
+        <MomentDivider scene="tea" />
         <GalleryCarousel photos={photos} counts={counts} id="gallery" />
+        <MomentDivider scene="stars" />
       </main>
       <FooterSection />
     </SmoothScrollProvider>

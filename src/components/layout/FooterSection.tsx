@@ -42,9 +42,13 @@ export function FooterSection() {
     <footer
       ref={footerRef}
       style={{
-        background: "var(--bg-deep)",
-        borderTop: "1px solid var(--border)",
-        padding: isMobile ? "56px 24px 28px" : "80px 40px 40px",
+        position: "relative",
+        zIndex: 1,
+        // The evening settles in: the footer fades up from the page into a
+        // deeper, warmer tone instead of arriving behind a hard border.
+        background:
+          "linear-gradient(to bottom, rgba(236,231,222,0) 0%, rgba(236,231,222,0.72) 16%, rgba(236,231,222,0.92) 40%, #E9E3D8 100%)",
+        padding: isMobile ? "72px 24px 28px" : "104px 40px 40px",
         display: "flex",
         flexDirection: "column",
         gap: isMobile ? 44 : 56,
