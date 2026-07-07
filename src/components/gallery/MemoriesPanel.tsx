@@ -181,7 +181,7 @@ export function MemoriesPanel({ open, photoId, caption, subjectLabel, year, onCl
                 )}
                 <h3
                   style={{
-                    fontFamily: "Fraunces, Georgia, serif",
+                    fontFamily: "var(--font-display)",
                     fontSize: isMobile ? 24 : 30,
                     fontWeight: 300,
                     color: "var(--fg)",
@@ -193,7 +193,7 @@ export function MemoriesPanel({ open, photoId, caption, subjectLabel, year, onCl
                 </h3>
                 <span
                   style={{
-                    fontFamily: "Outfit, sans-serif",
+                    fontFamily: "var(--font-body)",
                     fontSize: 10,
                     fontWeight: 500,
                     letterSpacing: "0.18em",
@@ -234,7 +234,7 @@ export function MemoriesPanel({ open, photoId, caption, subjectLabel, year, onCl
               {caption && (
                 <p
                   style={{
-                    fontFamily: "Fraunces, Georgia, serif",
+                    fontFamily: "var(--font-display)",
                     fontSize: 16,
                     fontWeight: 300,
                     fontStyle: "italic",
@@ -254,7 +254,7 @@ export function MemoriesPanel({ open, photoId, caption, subjectLabel, year, onCl
               ) : comments.length === 0 ? (
                 <p
                   style={{
-                    fontFamily: "Fraunces, Georgia, serif",
+                    fontFamily: "var(--font-display)",
                     fontSize: 17,
                     fontStyle: "italic",
                     fontWeight: 300,
@@ -277,7 +277,7 @@ export function MemoriesPanel({ open, photoId, caption, subjectLabel, year, onCl
                     >
                       <p
                         style={{
-                          fontFamily: "Fraunces, Georgia, serif",
+                          fontFamily: "var(--font-display)",
                           fontSize: 16,
                           fontWeight: 300,
                           fontStyle: "italic",
@@ -309,7 +309,7 @@ export function MemoriesPanel({ open, photoId, caption, subjectLabel, year, onCl
                     initial={{ opacity: 0, y: 8 }}
                     animate={{ opacity: 1, y: 0 }}
                     style={{
-                      fontFamily: "Fraunces, Georgia, serif",
+                      fontFamily: "var(--font-display)",
                       fontSize: 15,
                       fontStyle: "italic",
                       fontWeight: 300,
@@ -331,7 +331,7 @@ export function MemoriesPanel({ open, photoId, caption, subjectLabel, year, onCl
                       background: "var(--accent)",
                       border: "none",
                       color: "#FAF9F6",
-                      fontFamily: "Outfit, sans-serif",
+                      fontFamily: "var(--font-body)",
                       fontSize: 11,
                       fontWeight: 500,
                       letterSpacing: "0.16em",
@@ -380,7 +380,7 @@ export function MemoriesPanel({ open, photoId, caption, subjectLabel, year, onCl
                       style={{ ...inputStyle, resize: "vertical", minHeight: 84 }}
                     />
                     {errorMsg && (
-                      <span style={{ fontFamily: "Outfit, sans-serif", fontSize: 11, color: "var(--accent)" }}>{errorMsg}</span>
+                      <span style={{ fontFamily: "var(--font-body)", fontSize: 11, color: "var(--accent)" }}>{errorMsg}</span>
                     )}
                     <div style={{ display: "flex", gap: 10 }}>
                       <button
@@ -390,7 +390,7 @@ export function MemoriesPanel({ open, photoId, caption, subjectLabel, year, onCl
                           background: "var(--accent)",
                           border: "none",
                           color: "#FAF9F6",
-                          fontFamily: "Outfit, sans-serif",
+                          fontFamily: "var(--font-body)",
                           fontSize: 11,
                           fontWeight: 500,
                           letterSpacing: "0.16em",
@@ -410,7 +410,7 @@ export function MemoriesPanel({ open, photoId, caption, subjectLabel, year, onCl
                           background: "transparent",
                           border: "1px solid var(--border)",
                           color: "var(--fg-muted)",
-                          fontFamily: "Outfit, sans-serif",
+                          fontFamily: "var(--font-body)",
                           fontSize: 11,
                           fontWeight: 500,
                           letterSpacing: "0.16em",
@@ -435,7 +435,7 @@ export function MemoriesPanel({ open, photoId, caption, subjectLabel, year, onCl
 }
 
 const metaStyle: React.CSSProperties = {
-  fontFamily: "Outfit, sans-serif",
+  fontFamily: "var(--font-body)",
   fontSize: 10,
   fontWeight: 500,
   letterSpacing: "0.14em",
@@ -447,7 +447,7 @@ const inputStyle: React.CSSProperties = {
   background: "rgba(255,255,255,0.7)",
   border: "1px solid var(--border)",
   color: "var(--fg)",
-  fontFamily: "Outfit, sans-serif",
+  fontFamily: "var(--font-body)",
   fontSize: 14,
   padding: "11px 14px",
   outline: "none",

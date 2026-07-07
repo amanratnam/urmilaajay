@@ -1,7 +1,15 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { CustomCursor } from "@/components/ui/CustomCursor";
 import { LayoutProvider } from "@/components/layout/LayoutProvider";
+
+// Edge-to-edge on notched phones; the browser UI tints to the paper tone.
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: "#FAF9F6",
+};
 
 export const metadata: Metadata = {
   title: { default: "Urmila & Ajay", template: "%s — Urmila & Ajay" },

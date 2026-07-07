@@ -75,7 +75,7 @@ export function CommentThread({ photoId }: Props) {
     >
       <h2
         style={{
-          fontFamily: "Fraunces, Georgia, serif",
+          fontFamily: "var(--font-display)",
           fontSize: 28,
           fontWeight: 300,
           color: "var(--fg)",
@@ -99,7 +99,7 @@ export function CommentThread({ photoId }: Props) {
             >
               <p
                 style={{
-                  fontFamily: "Fraunces, Georgia, serif",
+                  fontFamily: "var(--font-display)",
                   fontSize: 16,
                   fontWeight: 300,
                   fontStyle: "italic",
@@ -112,7 +112,7 @@ export function CommentThread({ photoId }: Props) {
               </p>
               <span
                 style={{
-                  fontFamily: "Outfit, sans-serif",
+                  fontFamily: "var(--font-body)",
                   fontSize: 11,
                   fontWeight: 500,
                   letterSpacing: "0.1em",
@@ -136,7 +136,7 @@ export function CommentThread({ photoId }: Props) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, ease }}
             style={{
-              fontFamily: "Fraunces, Georgia, serif",
+              fontFamily: "var(--font-display)",
               fontSize: 16,
               fontWeight: 300,
               fontStyle: "italic",
@@ -196,7 +196,7 @@ export function CommentThread({ photoId }: Props) {
               />
               <span
                 style={{
-                  fontFamily: "Outfit, sans-serif",
+                  fontFamily: "var(--font-body)",
                   fontSize: 10,
                   color: "var(--fg-muted)",
                   textAlign: "right",
@@ -208,7 +208,7 @@ export function CommentThread({ photoId }: Props) {
             </div>
 
             {errorMsg ? (
-              <p style={{ fontFamily: "Outfit, sans-serif", fontSize: 12, color: "var(--accent)", margin: 0 }}>
+              <p style={{ fontFamily: "var(--font-body)", fontSize: 12, color: "var(--accent)", margin: 0 }}>
                 {errorMsg}
               </p>
             ) : null}
@@ -222,7 +222,7 @@ export function CommentThread({ photoId }: Props) {
                 background: "transparent",
                 border: "1px solid var(--border)",
                 color: "var(--fg)",
-                fontFamily: "Outfit, sans-serif",
+                fontFamily: "var(--font-body)",
                 fontSize: 11,
                 fontWeight: 500,
                 letterSpacing: "0.12em",
@@ -245,7 +245,7 @@ export function CommentThread({ photoId }: Props) {
 }
 
 const labelStyle: React.CSSProperties = {
-  fontFamily: "Outfit, sans-serif",
+  fontFamily: "var(--font-body)",
   fontSize: 10,
   fontWeight: 500,
   letterSpacing: "0.12em",
@@ -257,7 +257,7 @@ const inputStyle: React.CSSProperties = {
   background: "var(--bg-elevated)",
   border: "1px solid var(--border)",
   color: "var(--fg)",
-  fontFamily: "Outfit, sans-serif",
+  fontFamily: "var(--font-body)",
   fontSize: 14,
   padding: "12px 16px",
   outline: "none",
