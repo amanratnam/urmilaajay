@@ -48,10 +48,14 @@ export function FooterSection() {
         // deeper, warmer tone instead of arriving behind a hard border.
         background:
           "linear-gradient(to bottom, rgba(236,231,222,0) 0%, rgba(236,231,222,0.72) 16%, rgba(236,231,222,0.92) 40%, #E9E3D8 100%)",
-        padding: isMobile ? "72px 24px 28px" : "104px 40px 40px",
+        // Extra bottom room on mobile so the floating dock never covers
+        // the credits (plus the phone's home-indicator safe area).
+        padding: isMobile
+          ? "48px 24px calc(96px + env(safe-area-inset-bottom, 0px))"
+          : "64px 40px 32px",
         display: "flex",
         flexDirection: "column",
-        gap: isMobile ? 44 : 56,
+        gap: isMobile ? 32 : 38,
         perspective: "1000px",
         opacity: 0,
       }}
@@ -65,12 +69,12 @@ export function FooterSection() {
           maxWidth: 720,
           width: "100%",
           margin: "0 auto",
-          paddingTop: isMobile ? 28 : 44,
+          paddingTop: isMobile ? 22 : 30,
           borderTop: "1px solid var(--border)",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          gap: isMobile ? 22 : 28,
+          gap: isMobile ? 16 : 20,
           textAlign: "center",
         }}
       >
@@ -78,7 +82,7 @@ export function FooterSection() {
 
         <p
           style={{
-            fontFamily: "Fraunces, Georgia, serif",
+            fontFamily: "var(--font-display)",
             fontSize: isMobile ? 16 : 19,
             fontWeight: 300,
             fontStyle: "italic",
@@ -93,7 +97,7 @@ export function FooterSection() {
 
         <h2
           style={{
-            fontFamily: "Fraunces, Georgia, serif",
+            fontFamily: "var(--font-display)",
             fontSize: "clamp(36px, 6vw, 68px)",
             fontWeight: 300,
             color: "var(--fg)",
@@ -107,7 +111,7 @@ export function FooterSection() {
 
         <span
           style={{
-            fontFamily: "Outfit, sans-serif",
+            fontFamily: "var(--font-body)",
             fontSize: 11,
             fontWeight: 500,
             letterSpacing: "0.24em",
@@ -135,7 +139,7 @@ export function FooterSection() {
       >
         <p
           style={{
-            fontFamily: "Outfit, sans-serif",
+            fontFamily: "var(--font-body)",
             fontSize: 12,
             fontWeight: 300,
             color: "var(--fg-muted)",
@@ -149,7 +153,7 @@ export function FooterSection() {
         <a
           href={`mailto:${EMAIL}`}
           style={{
-            fontFamily: "Outfit, sans-serif",
+            fontFamily: "var(--font-body)",
             fontSize: 12,
             fontWeight: 400,
             color: "var(--fg-muted)",
@@ -181,7 +185,7 @@ export function FooterSection() {
       >
         <span
           style={{
-            fontFamily: "Outfit, sans-serif",
+            fontFamily: "var(--font-body)",
             fontSize: 11,
             color: "var(--fg-muted)",
             letterSpacing: "0.08em",
@@ -191,7 +195,7 @@ export function FooterSection() {
         </span>
         <span
           style={{
-            fontFamily: "Fraunces, Georgia, serif",
+            fontFamily: "var(--font-display)",
             fontSize: 22,
             fontWeight: 400,
             fontStyle: "italic",

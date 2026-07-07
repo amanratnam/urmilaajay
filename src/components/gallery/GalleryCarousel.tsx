@@ -5,6 +5,8 @@ import { motion, AnimatePresence, PanInfo } from "framer-motion";
 import Image from "next/image";
 import { Photo } from "@/types";
 import { MemoriesPanel } from "./MemoriesPanel";
+import { Reveal } from "@/components/ui/Reveal";
+import { WalkInto } from "@/components/ui/WalkInto";
 import { useIsMobile } from "@/hooks/useMediaQuery";
 
 interface Props {
@@ -107,7 +109,7 @@ export function GalleryCarousel({ photos, counts = {}, id }: Props) {
   if (count === 0) {
     return (
       <section id={id} style={{ padding: "120px 48px", textAlign: "center", background: "transparent" }}>
-        <p style={{ fontFamily: "Fraunces, Georgia, serif", fontStyle: "italic", fontWeight: 300, color: "var(--fg-muted)" }}>
+        <p style={{ fontFamily: "var(--font-display)", fontStyle: "italic", fontWeight: 300, color: "var(--fg-muted)" }}>
           The archive is being prepared.
         </p>
       </section>
@@ -134,12 +136,14 @@ export function GalleryCarousel({ photos, counts = {}, id }: Props) {
       style={{
         position: "relative",
         background: "transparent",
-        padding: isMobile ? "48px 0 64px" : "72px 0 84px",
+        padding: isMobile ? "28px 0 40px" : "44px 0 52px",
         overflow: "hidden",
       }}
     >
       {/* ── Section header w/ position counter ───────────────────────── */}
-      <div
+      <Reveal
+        blur
+        y={28}
         style={{
           padding: isMobile ? "0 24px 24px" : "0 56px 32px",
           display: "flex",
@@ -151,7 +155,7 @@ export function GalleryCarousel({ photos, counts = {}, id }: Props) {
         <div style={{ display: "flex", alignItems: "baseline", gap: 18 }}>
           <span
             style={{
-              fontFamily: "Outfit, sans-serif",
+              fontFamily: "var(--font-body)",
               fontSize: 11,
               fontWeight: 500,
               letterSpacing: "0.18em",
@@ -163,7 +167,7 @@ export function GalleryCarousel({ photos, counts = {}, id }: Props) {
           </span>
           <span
             style={{
-              fontFamily: "Outfit, sans-serif",
+              fontFamily: "var(--font-body)",
               fontSize: 11,
               fontWeight: 300,
               color: "var(--fg-muted)",
@@ -182,7 +186,7 @@ export function GalleryCarousel({ photos, counts = {}, id }: Props) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, ease }}
             style={{
-              fontFamily: "Outfit, sans-serif",
+              fontFamily: "var(--font-body)",
               fontSize: isMobile ? 18 : 24,
               fontWeight: 300,
               letterSpacing: "-0.01em",
@@ -197,7 +201,7 @@ export function GalleryCarousel({ photos, counts = {}, id }: Props) {
           </motion.span>
           <span
             style={{
-              fontFamily: "Outfit, sans-serif",
+              fontFamily: "var(--font-body)",
               fontSize: 11,
               fontWeight: 300,
               color: "var(--fg-muted)",
@@ -207,9 +211,12 @@ export function GalleryCarousel({ photos, counts = {}, id }: Props) {
             / {String(count).padStart(2, "0")}
           </span>
         </div>
-      </div>
+      </Reveal>
 
-      {/* ── Coverflow stage (swipeable on touch) ────────────────────── */}
+      {/* ── Coverflow stage (swipeable on touch) ─────────────────────
+           Waits further up the lane and walks forward to meet you,
+           scrubbed to the scroll — reverses if you step back. */}
+      <WalkInto from={0.88} tilt={14}>
       <motion.div
         animate={{ height: stageHeight, x: stageShiftX }}
         transition={{ duration: 0.7, ease }}
@@ -315,7 +322,7 @@ export function GalleryCarousel({ photos, counts = {}, id }: Props) {
                     border: "1px solid rgba(225,220,211,0.85)",
                     backdropFilter: "blur(10px)",
                     color: "var(--fg)",
-                    fontFamily: "Outfit, sans-serif",
+                    fontFamily: "var(--font-body)",
                     fontSize: isMobile ? 10 : 11,
                     fontWeight: 500,
                     letterSpacing: "0.16em",
@@ -360,6 +367,7 @@ export function GalleryCarousel({ photos, counts = {}, id }: Props) {
           </>
         )}
       </motion.div>
+      </WalkInto>
 
       {/* ── Caption (word-by-word reveal) + meta ────────────────────── */}
       <AnimatePresence mode="wait">
@@ -369,7 +377,7 @@ export function GalleryCarousel({ photos, counts = {}, id }: Props) {
           animate={{ opacity: panelOpen ? 0 : 1 }}
           exit={{ opacity: 0, y: -6, transition: { duration: 0.25 } }}
           style={{
-            marginTop: isMobile ? 18 : 24,
+            marginTop: isMobile ? 12 : 16,
             textAlign: "center",
             display: "flex",
             flexDirection: "column",
@@ -381,7 +389,7 @@ export function GalleryCarousel({ photos, counts = {}, id }: Props) {
         >
           <p
             style={{
-              fontFamily: "Fraunces, Georgia, serif",
+              fontFamily: "var(--font-display)",
               fontSize: activePhoto.caption ? "clamp(17px, 2.2vw, 24px)" : 18,
               fontWeight: 300,
               fontStyle: "italic",
@@ -410,7 +418,7 @@ export function GalleryCarousel({ photos, counts = {}, id }: Props) {
             animate={{ opacity: 1 }}
             transition={{ duration: 0.6, delay: 0.3 }}
             style={{
-              fontFamily: "Outfit, sans-serif",
+              fontFamily: "var(--font-body)",
               fontSize: 10,
               fontWeight: 500,
               letterSpacing: "0.18em",
@@ -426,7 +434,7 @@ export function GalleryCarousel({ photos, counts = {}, id }: Props) {
           {memories.length > 0 && (
             <div
               style={{
-                marginTop: isMobile ? 14 : 20,
+                marginTop: isMobile ? 10 : 14,
                 display: "flex",
                 gap: isMobile ? 12 : 16,
                 maxWidth: "100%",

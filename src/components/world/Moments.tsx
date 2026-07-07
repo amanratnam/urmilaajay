@@ -1,6 +1,11 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { motion, useReducedMotion } from "framer-motion";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+gsap.registerPlugin(ScrollTrigger);
 
 /**
  * Recurring figurine moments — mom and dad, stylized like handcrafted
@@ -410,26 +415,60 @@ export function MomentDivider({ scene }: { scene: MomentName }) {
   const reduce = useReducedMotion();
   const still = !!reduce;
 
+  // Scroll-linked depth: as the moment crosses the viewport it drifts
+  // slower than the page (parallax) and grows to full size — the camera
+  // passing a scene rather than a section arriving. GSAP ScrollTrigger
+  // (already synced to Lenis) drives the scrub.
+  const ref = useRef<HTMLElement>(null);
+  const parallaxRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (still) return;
+    const section = ref.current;
+    const inner = parallaxRef.current;
+    if (!section || !inner) return;
+
+    const ctx = gsap.context(() => {
+      gsap.fromTo(
+        inner,
+        { y: 40, scale: 0.95 },
+        {
+          y: -40,
+          scale: 1,
+          ease: "none",
+          scrollTrigger: {
+            trigger: section,
+            start: "top bottom",
+            end: "bottom top",
+            scrub: 0.6,
+          },
+        }
+      );
+    }, section);
+    return () => ctx.revert();
+  }, [still]);
+
   return (
     <section
+      ref={ref}
       aria-hidden
       style={{
         position: "relative",
         display: "flex",
         justifyContent: "center",
-        padding: "6vh 24px 4vh",
+        padding: "2.5vh 24px 1.5vh",
         background: "transparent",
-        overflow: "hidden",
+        overflow: "visible",
       }}
       onContextMenu={(e) => e.preventDefault()}
     >
       <motion.div
-        initial={{ opacity: 0, y: 44 }}
-        whileInView={{ opacity: 1, y: 0 }}
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
         viewport={{ once: true, margin: "-12%" }}
         transition={{ duration: 1.7, ease }}
         style={{
-          width: "min(88vw, 620px)",
+          width: "min(82vw, 540px)",
           // Feather the scene's edges into the page so the ground never
           // reads as a floating card — it belongs to the world around it.
           WebkitMaskImage:
@@ -438,9 +477,12 @@ export function MomentDivider({ scene }: { scene: MomentName }) {
             "radial-gradient(ellipse 68% 74% at 50% 52%, black 42%, transparent 94%)",
         }}
       >
-        {scene === "walk" && <WalkScene still={still} />}
-        {scene === "tea" && <TeaScene still={still} />}
-        {scene === "stars" && <StarsScene still={still} />}
+        {/* GSAP writes the parallax transform here; framer owns opacity above */}
+        <div ref={parallaxRef} style={{ willChange: "transform" }}>
+          {scene === "walk" && <WalkScene still={still} />}
+          {scene === "tea" && <TeaScene still={still} />}
+          {scene === "stars" && <StarsScene still={still} />}
+        </div>
       </motion.div>
     </section>
   );

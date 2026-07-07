@@ -18,7 +18,7 @@ export default function PhotoNotFound() {
     >
       <h1
         style={{
-          fontFamily: "Fraunces, Georgia, serif",
+          fontFamily: "var(--font-display)",
           fontSize: "clamp(48px, 8vw, 96px)",
           fontWeight: 300,
           color: "var(--fg)",
@@ -34,7 +34,7 @@ export default function PhotoNotFound() {
       <Link
         href="/"
         style={{
-          fontFamily: "Outfit, sans-serif",
+          fontFamily: "var(--font-body)",
           fontSize: 11,
           fontWeight: 500,
           letterSpacing: "0.12em",

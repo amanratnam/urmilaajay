@@ -137,6 +137,10 @@ export function HeroSection({ photos }: Props) {
           gridTemplateColumns: isMobile ? "1fr 1fr" : "1fr 1fr",
           gap: isMobile ? 10 : 16,
           padding: isMobile ? "0 16px 24px" : "24px 5vw 24px 0",
+          // A corridor of photographs: the two columns stand like gallery
+          // walls angled toward the path you walk between them.
+          perspective: 1300,
+          perspectiveOrigin: "50% 42%",
           // Fade the photo columns into the living sky behind them
           // (a mask, not an overlay, so the atmosphere shows through).
           WebkitMaskImage:
@@ -145,8 +149,8 @@ export function HeroSection({ photos }: Props) {
             "linear-gradient(to bottom, transparent 0%, black 10%, black 90%, transparent 100%)",
         }}
       >
-        <MarqueeColumn photos={colA} direction="up" speed={isMobile ? 38 : 30} delay={0.5} />
-        <MarqueeColumn photos={colB} direction="down" speed={isMobile ? 32 : 24} offset={isMobile ? 40 : 64} delay={0.7} />
+        <MarqueeColumn photos={colA} direction="up" speed={isMobile ? 38 : 30} delay={0.5} tilt={isMobile ? 7 : 9} />
+        <MarqueeColumn photos={colB} direction="down" speed={isMobile ? 32 : 24} offset={isMobile ? 40 : 64} delay={0.7} tilt={isMobile ? -7 : -9} />
       </div>
 
       {/* ── Scroll cue ──────────────────────────────────────────────── */}
@@ -166,6 +170,8 @@ interface MarqueeProps {
   offset?: number;
   /** Entrance-reveal delay in seconds. */
   delay?: number;
+  /** Corridor-wall angle in degrees (rotateY within the parent's perspective). */
+  tilt?: number;
 }
 
 /**
@@ -173,7 +179,7 @@ interface MarqueeProps {
  * with scroll velocity, so the columns feel alive instead of mechanical.
  * Loops seamlessly via modulo on the duplicated track's half-height.
  */
-function MarqueeColumn({ photos, direction, speed, offset = 0, delay = 0 }: MarqueeProps) {
+function MarqueeColumn({ photos, direction, speed, offset = 0, delay = 0, tilt = 0 }: MarqueeProps) {
   const trackRef = useRef<HTMLDivElement>(null);
   // Duplicate the list so the loop can wrap seamlessly at the halfway point
   const items = [...photos, ...photos];
@@ -222,7 +228,15 @@ function MarqueeColumn({ photos, direction, speed, offset = 0, delay = 0 }: Marq
   return (
     <div
       className="marquee-col"
-      style={{ position: "relative", overflow: "hidden", paddingTop: offset, animationDelay: `${delay}s` }}
+      style={
+        {
+          position: "relative",
+          overflow: "hidden",
+          paddingTop: offset,
+          animationDelay: `${delay}s`,
+          "--wall-tilt": `${tilt}deg`,
+        } as React.CSSProperties
+      }
     >
       <div
         ref={trackRef}

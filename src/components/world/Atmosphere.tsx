@@ -28,6 +28,9 @@ interface Mote {
   sway: number;
   phase: number;
   alpha: number;
+  /** Camera depth 0.25 (far) – 1.3 (near): near motes are larger, brighter,
+      and rush past faster as the visitor walks (scrolls). */
+  depth: number;
 }
 interface Petal {
   x: number;
@@ -111,15 +114,19 @@ export function Atmosphere() {
     // ── Populate the world ──────────────────────────────────────────
     const rand = (a: number, b: number) => a + Math.random() * (b - a);
 
-    const motes: Mote[] = Array.from({ length: isMobile ? 26 : 60 }, () => ({
-      x: rand(0, w),
-      y: rand(0, h),
-      r: rand(0.6, 1.9),
-      vy: rand(-9, -3),
-      sway: rand(6, 22),
-      phase: rand(0, Math.PI * 2),
-      alpha: rand(0.1, 0.3),
-    }));
+    const motes: Mote[] = Array.from({ length: isMobile ? 26 : 60 }, () => {
+      const depth = rand(0.25, 1.3);
+      return {
+        x: rand(0, w),
+        y: rand(0, h),
+        r: (0.5 + depth * 1.1) * rand(0.8, 1.2),
+        vy: rand(-9, -3) * (0.5 + depth * 0.6),
+        sway: rand(6, 22),
+        phase: rand(0, Math.PI * 2),
+        alpha: rand(0.08, 0.2) + depth * 0.12,
+        depth,
+      };
+    });
 
     const petals: Petal[] = Array.from({ length: isMobile ? 3 : 6 }, () => ({
       x: rand(0, w),
@@ -167,15 +174,19 @@ export function Atmosphere() {
     let raf = 0;
     let last = performance.now();
     let running = true;
+    let lastScrollY = window.scrollY;
 
     const tick = (now: number) => {
       raf = requestAnimationFrame(tick);
       const dt = Math.min((now - last) / 1000, 0.05);
       last = now;
 
-      // Scroll position → time of day.
+      // Scroll position → time of day; scroll delta → camera dolly.
+      const sy = window.scrollY;
+      const dolly = Math.max(-90, Math.min(90, sy - lastScrollY));
+      lastScrollY = sy;
       const max = document.documentElement.scrollHeight - h;
-      const p = max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0;
+      const p = max > 0 ? Math.min(1, Math.max(0, sy / max)) : 0;
       const dawn = 1 - smoothstep(p / 0.34);
       const dusk = smoothstep((p - 0.56) / 0.36);
 
@@ -199,8 +210,11 @@ export function Atmosphere() {
       }
 
       // Dust motes — always present, rising like pollen in light.
+      // Walking (scrolling) dollies the camera: near motes stream past
+      // faster than far ones, which is what sells the depth of the lane.
       for (const m of motes) {
         m.y += m.vy * dt;
+        m.y -= dolly * m.depth * 0.55;
         const sx = Math.sin(t * 0.4 + m.phase) * m.sway * dt;
         m.x += sx;
         // A soft push away from the cursor.
@@ -225,13 +239,19 @@ export function Atmosphere() {
         ctx.fill();
       }
 
-      // Petals — a few, falling slowly, tumbling.
+      // Petals — a few, falling slowly, tumbling; they too stream past
+      // gently as the camera walks.
       for (const pt of petals) {
         pt.y += pt.vy * dt;
+        pt.y -= dolly * 0.3;
         pt.x += Math.sin(t * 0.55 + pt.phase) * pt.sway * dt;
         pt.rot += pt.vr * dt;
         if (pt.y > h + 12) {
           pt.y = -12;
+          pt.x = rand(0, w);
+        }
+        if (pt.y < -14) {
+          pt.y = h + 12;
           pt.x = rand(0, w);
         }
         ctx.save();

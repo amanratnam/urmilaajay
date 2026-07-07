@@ -4,6 +4,7 @@ import { useState, useRef, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Owl } from "./Owl";
 import { CharReveal } from "@/components/ui/CharReveal";
+import { WalkInto } from "@/components/ui/WalkInto";
 import { useIsMobile } from "@/hooks/useMediaQuery";
 
 const ease = [0.22, 1, 0.36, 1] as const;
@@ -106,10 +107,12 @@ export function PersonalLetterForm() {
         maxWidth: 680,
         width: "100%",
         margin: "0 auto",
-        padding: isMobile ? "26px 8px 0" : "26px 24px 0",
+        padding: isMobile ? "14px 8px 0" : "14px 24px 0",
         textAlign: "center",
       }}
     >
+      {/* The sheet stands further down the lane and rises to meet you. */}
+      <WalkInto from={0.92} tilt={10}>
       <div className="letter-paper">
         <WaxSeal />
         <span className="hero-eyebrow" style={{ display: "block", marginBottom: 12 }}>
@@ -117,7 +120,7 @@ export function PersonalLetterForm() {
       </span>
       <h2
         style={{
-          fontFamily: "Fraunces, Georgia, serif",
+          fontFamily: "var(--font-display)",
           fontSize: isMobile ? 32 : "clamp(36px, 4.5vw, 52px)",
           fontWeight: 300,
           color: "var(--fg)",
@@ -133,7 +136,7 @@ export function PersonalLetterForm() {
       </h2>
       <p
         style={{
-          fontFamily: "Fraunces, Georgia, serif",
+          fontFamily: "var(--font-display)",
           fontSize: isMobile ? 14 : 16,
           fontStyle: "italic",
           fontWeight: 300,
@@ -157,7 +160,7 @@ export function PersonalLetterForm() {
           >
             <p
               style={{
-                fontFamily: "Fraunces, Georgia, serif",
+                fontFamily: "var(--font-display)",
                 fontSize: isMobile ? 20 : 24,
                 fontStyle: "italic",
                 fontWeight: 300,
@@ -170,7 +173,7 @@ export function PersonalLetterForm() {
             </p>
             <p
               style={{
-                fontFamily: "Fraunces, Georgia, serif",
+                fontFamily: "var(--font-display)",
                 fontSize: isMobile ? 15 : 17,
                 fontStyle: "italic",
                 fontWeight: 300,
@@ -245,7 +248,7 @@ export function PersonalLetterForm() {
                   ...inputStyle,
                   resize: "vertical",
                   minHeight: textareaMinH,
-                  fontFamily: "Fraunces, Georgia, serif",
+                  fontFamily: "var(--font-display)",
                   fontSize: 15,
                   fontWeight: 300,
                   lineHeight: 1.7,
@@ -255,11 +258,11 @@ export function PersonalLetterForm() {
             </Field>
 
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 14, marginTop: -2 }}>
-              <span style={{ fontSize: 11, color: "var(--fg-muted)", fontFamily: "Outfit, sans-serif" }}>
+              <span style={{ fontSize: 11, color: "var(--fg-muted)", fontFamily: "var(--font-body)" }}>
                 {body.length} / 1000
               </span>
               {errorMsg && (
-                <span style={{ fontFamily: "Outfit, sans-serif", fontSize: 11, color: "var(--accent)" }}>
+                <span style={{ fontFamily: "var(--font-body)", fontSize: 11, color: "var(--accent)" }}>
                   {errorMsg}
                 </span>
               )}
@@ -281,7 +284,7 @@ export function PersonalLetterForm() {
                   background: "var(--accent)",
                   border: "none",
                   color: "#FAF9F6",
-                  fontFamily: "Outfit, sans-serif",
+                  fontFamily: "var(--font-body)",
                   fontSize: 11,
                   fontWeight: 500,
                   letterSpacing: "0.2em",
@@ -299,6 +302,7 @@ export function PersonalLetterForm() {
         )}
       </AnimatePresence>
       </div>
+      </WalkInto>
 
       {/* ── Flying owl rendered at the button's centre ────────────────
            Kept OUTSIDE .letter-paper: the paper's transform would turn
@@ -377,7 +381,7 @@ function Field({
     <label style={{ display: "flex", flexDirection: "column", gap: 4 }}>
       <span
         style={{
-          fontFamily: "Outfit, sans-serif",
+          fontFamily: "var(--font-body)",
           fontSize: 10,
           fontWeight: 500,
           letterSpacing: "0.18em",
@@ -391,7 +395,7 @@ function Field({
       {helper && (
         <span
           style={{
-            fontFamily: "Fraunces, Georgia, serif",
+            fontFamily: "var(--font-display)",
             fontStyle: "italic",
             fontSize: 11,
             fontWeight: 300,
@@ -428,7 +432,8 @@ function WaxSeal() {
         x="26"
         y="34"
         textAnchor="middle"
-        fontFamily="Fraunces, Georgia, serif"
+        // CSS vars don't resolve in SVG presentation attributes — use style.
+        style={{ fontFamily: "var(--font-display)" }}
         fontStyle="italic"
         fontSize="22"
         fill="#F3E5D2"
@@ -444,7 +449,7 @@ const inputStyle: React.CSSProperties = {
   background: "rgba(255,255,255,0.65)",
   border: "1px solid var(--border)",
   color: "var(--fg)",
-  fontFamily: "Outfit, sans-serif",
+  fontFamily: "var(--font-body)",
   fontSize: 14,
   padding: "11px 14px",
   outline: "none",

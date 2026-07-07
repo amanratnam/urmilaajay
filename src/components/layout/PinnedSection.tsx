@@ -63,8 +63,8 @@ export function PinnedSection({ photo }: Props) {
 
       const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-      // ~0.65 viewport of scroll per statement — present, not endless.
-      const pinDistance = () => panels.length * 0.65 * window.innerHeight;
+      // ~0.45 viewport of scroll per statement — present, never endless.
+      const pinDistance = () => panels.length * 0.45 * window.innerHeight;
 
       const tl = gsap.timeline({
         scrollTrigger: {
@@ -81,9 +81,22 @@ export function PinnedSection({ photo }: Props) {
         const chars = p.querySelectorAll(".pp-char");
 
         if (i > 0) {
-          tl.to(panels[i - 1], { opacity: 0, y: -36, duration: 0.35, ease: "power2.in" });
+          // The finished statement walks PAST the camera — up, closer,
+          // dissolving — like a memory you've just moved through.
+          tl.to(panels[i - 1], {
+            opacity: 0,
+            y: -44,
+            scale: 1.08,
+            duration: 0.32,
+            ease: "power2.in",
+          });
         }
-        tl.set(p, { opacity: 1 });
+        // The next one approaches from deeper in the lane.
+        tl.fromTo(
+          p,
+          { opacity: 0, scale: 0.9, z: -120, transformPerspective: 900 },
+          { opacity: 1, scale: 1, z: 0, duration: 0.4, ease: "power2.out" }
+        );
         if (eyebrow) {
           tl.fromTo(
             eyebrow,
@@ -106,9 +119,15 @@ export function PinnedSection({ photo }: Props) {
           },
           "<"
         );
-        tl.to({}, { duration: 0.45 }); // hold so the line can land
+        tl.to({}, { duration: 0.32 }); // hold so the line can land
       });
-      tl.to(panels[panels.length - 1], { opacity: 0, y: -36, duration: 0.35, ease: "power2.in" });
+      tl.to(panels[panels.length - 1], {
+        opacity: 0,
+        y: -44,
+        scale: 1.08,
+        duration: 0.32,
+        ease: "power2.in",
+      });
 
       // Photo parallax: slow drift + gentle zoom through the whole pin.
       if (photoRef.current && !reduced) {
