@@ -2,7 +2,7 @@ import { SmoothScrollProvider } from "@/components/layout/SmoothScrollProvider";
 import { Nav } from "@/components/layout/Nav";
 import { HeroSection } from "@/components/layout/HeroSection";
 import { PinnedSection } from "@/components/layout/PinnedSection";
-import { GalleryCarousel } from "@/components/gallery/GalleryCarousel";
+import { GallerySphere } from "@/components/gallery/GallerySphere";
 import { FooterSection } from "@/components/layout/FooterSection";
 import { Atmosphere } from "@/components/world/Atmosphere";
 import { MomentDivider } from "@/components/world/Moments";
@@ -31,7 +31,7 @@ export default async function Home() {
         <MomentDivider scene="walk" />
         <PinnedSection photo={pinnedPhoto} />
         <MomentDivider scene="tea" />
-        <GalleryCarousel photos={photos} counts={counts} id="gallery" />
+        <GallerySphere photos={photos} counts={counts} id="gallery" />
         <MomentDivider scene="stars" />
       </main>
       <FooterSection />

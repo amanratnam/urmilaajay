@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { PersonalLetterForm } from "@/components/footer/PersonalLetterForm";
+import { DotField } from "@/components/footer/DotField";
 import { CharReveal } from "@/components/ui/CharReveal";
 import { MemorialIllustration } from "./MemorialIllustration";
 import { useIsMobile } from "@/hooks/useMediaQuery";
@@ -60,8 +61,18 @@ export function FooterSection() {
         opacity: 0,
       }}
     >
-      {/* Personal letter form */}
-      <PersonalLetterForm />
+      {/* Personal letter form, over an interactive dot field */}
+      <div style={{ position: "relative" }}>
+        <div
+          aria-hidden
+          style={{ position: "absolute", inset: isMobile ? "-24px -24px" : "-48px -40px", zIndex: 0 }}
+        >
+          <DotField dotRadius={4.5} dotSpacing={18} cursorRadius={650} bulgeStrength={96} />
+        </div>
+        <div style={{ position: "relative", zIndex: 1 }}>
+          <PersonalLetterForm />
+        </div>
+      </div>
 
       {/* ── Memorial heart ──────────────────────────────────────────── */}
       <div
