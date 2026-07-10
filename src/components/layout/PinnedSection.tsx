@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import Image from "next/image";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -22,135 +22,115 @@ const PANELS: PanelDef[] = [
   { eyebrow: "forever", lead: "We'll love you both,", emph: "always." },
 ];
 
+// Depth geometry of the corridor (in CSS px, before perspective).
+const GAP = 560; // z-distance between consecutive statements
+const BEAD_SPACING = 46; // z-distance between thread beads
+const TRAIL = 420; // extra thread depth beyond the last statement
+
 interface Props {
   photo: Photo | null;
 }
 
-/** Split a string into per-character spans GSAP can stagger. */
-function Chars({ text, className }: { text: string; className?: string }) {
-  return (
-    <span className={className} aria-label={text}>
-      {text.split(" ").map((word, wi, arr) => (
-        <span key={wi} aria-hidden style={{ display: "inline-block", whiteSpace: "nowrap" }}>
-          {Array.from(word).map((ch, ci) => (
-            <span key={ci} className="pp-char" style={{ display: "inline-block" }}>
-              {ch}
-            </span>
-          ))}
-          {wi < arr.length - 1 && <span>&nbsp;</span>}
-        </span>
-      ))}
-    </span>
-  );
-}
-
 /**
- * Pinned scroll section: the page holds still while four statements write
- * themselves in, character by character, scrub-driven — with mom's photo
- * breathing gently behind them.
+ * A walk deeper into memory. The statements are strung along a corridor
+ * that recedes INTO the screen; a thread of small lights leads from each
+ * one to the next. As you scroll, the camera flies forward down the
+ * thread — the current line resolves at the surface, then dissolves past
+ * you as the next rises out of the depth ahead.
+ *
+ * Real CSS 3D: a `perspective` scene with a `preserve-3d` camera we push
+ * along Z on scroll. Per-frame opacity/scale keep only the nearest line
+ * legible. Reduced-motion collapses it to a plain vertical fade.
  */
 export function PinnedSection({ photo }: Props) {
   const sectionRef = useRef<HTMLElement>(null);
+  const cameraRef = useRef<HTMLDivElement>(null);
   const photoRef = useRef<HTMLDivElement>(null);
+  const panelRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const beadRefs = useRef<(HTMLSpanElement | null)[]>([]);
+
+  // Thread beads fill the whole corridor depth.
+  const beadDepths = useMemo(() => {
+    const total = (PANELS.length - 1) * GAP + TRAIL;
+    const n = Math.ceil(total / BEAD_SPACING);
+    return Array.from({ length: n }, (_, i) => i * BEAD_SPACING);
+  }, []);
 
   useEffect(() => {
     const section = sectionRef.current;
-    if (!section) return;
+    const camera = cameraRef.current;
+    if (!section || !camera) return;
+
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     const ctx = gsap.context(() => {
-      const panels = section.querySelectorAll<HTMLElement>(".pinned-panel");
-      if (panels.length === 0) return;
+      const panels = panelRefs.current.filter(Boolean) as HTMLDivElement[];
+      const beads = beadRefs.current.filter(Boolean) as HTMLSpanElement[];
+      const lastZ = (PANELS.length - 1) * GAP;
 
-      const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      // ── Reduced motion: a plain, restful vertical fade sequence ──
+      if (reduced) {
+        panels.forEach((p, i) => (p.style.opacity = i === 0 ? "1" : "0"));
+        return;
+      }
 
-      // ~0.45 viewport of scroll per statement — present, never endless.
-      const pinDistance = () => panels.length * 0.45 * window.innerHeight;
+      // The camera transform alone moves the world through Z. Elements keep
+      // their fixed resting depth (set inline once); here we only compute how
+      // "near" the camera each one is — so far things stay dim & soft, the
+      // focal line is crisp, and passing lines swell and dissolve.
+      const place = (cameraZ: number) => {
+        panels.forEach((p, i) => {
+          const eff = i * GAP - cameraZ; // <0 passed the camera, >0 still ahead
+          // Legible only within one gap of the focal plane.
+          const t = Math.min(1, Math.abs(eff) / (GAP * 0.82));
+          const opacity =
+            eff < -GAP * 0.5 ? Math.max(0, 1 - (-eff - GAP * 0.5) / (GAP * 0.5)) : 1 - t;
+          p.style.opacity = Math.max(0, opacity).toFixed(3);
+          const blur = eff > 0 ? t * 5 : 0; // only lines still ahead are hazy
+          p.style.filter = blur > 0.15 ? `blur(${blur.toFixed(1)}px)` : "none";
+        });
 
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: section,
-          start: "top top",
-          end: () => `+=${pinDistance()}`,
-          pin: true,
-          scrub: reduced ? false : 0.8,
+        beads.forEach((b, i) => {
+          const eff = beadDepths[i] - cameraZ;
+          // Fade beads that have slipped behind the camera or are far in the haze.
+          let o = 1;
+          if (eff < 40) o = Math.max(0, eff / 40); // passing the camera
+          else if (eff > lastZ + TRAIL - 260) o = Math.max(0, (lastZ + TRAIL - eff) / 260);
+          b.style.opacity = (o * 0.9).toFixed(3);
+        });
+      };
+
+      place(0);
+
+      const pinDistance = () => (PANELS.length + 0.4) * 0.62 * window.innerHeight;
+      const photo = photoRef.current;
+
+      // Drive the camera straight from the trigger's own smoothed progress —
+      // simplest, most reliable path (no proxy tween to fall out of sync).
+      ScrollTrigger.create({
+        trigger: section,
+        start: "top top",
+        end: () => `+=${pinDistance()}`,
+        pin: true,
+        scrub: 0.7,
+        invalidateOnRefresh: true,
+        onUpdate: (self) => {
+          const z = self.progress * lastZ;
+          camera.style.transform = `translateZ(${z.toFixed(1)}px)`;
+          place(z);
+          if (photo) {
+            const p = self.progress;
+            photo.style.transform = `translateY(${(-8 + p * 16).toFixed(2)}%) scale(${(1.06 + p * 0.1).toFixed(3)})`;
+          }
         },
       });
 
-      panels.forEach((p, i) => {
-        const eyebrow = p.querySelector(".pinned-eyebrow");
-        const chars = p.querySelectorAll(".pp-char");
-
-        if (i > 0) {
-          // The finished statement walks PAST the camera — up, closer,
-          // dissolving — like a memory you've just moved through.
-          tl.to(panels[i - 1], {
-            opacity: 0,
-            y: -44,
-            scale: 1.08,
-            duration: 0.32,
-            ease: "power2.in",
-          });
-        }
-        // The next one approaches from deeper in the lane.
-        tl.fromTo(
-          p,
-          { opacity: 0, scale: 0.9, z: -120, transformPerspective: 900 },
-          { opacity: 1, scale: 1, z: 0, duration: 0.4, ease: "power2.out" }
-        );
-        if (eyebrow) {
-          tl.fromTo(
-            eyebrow,
-            { opacity: 0, letterSpacing: "0.55em" },
-            { opacity: 1, letterSpacing: "0.26em", duration: 0.4, ease: "power2.out" },
-            i === 0 ? "+=0" : "<+0.05"
-          );
-        }
-        // Characters write themselves in as you scroll.
-        tl.fromTo(
-          chars,
-          { opacity: 0, y: "0.5em", filter: "blur(4px)" },
-          {
-            opacity: 1,
-            y: 0,
-            filter: "blur(0px)",
-            duration: 0.5,
-            ease: "power2.out",
-            stagger: { each: 0.018 },
-          },
-          "<"
-        );
-        tl.to({}, { duration: 0.32 }); // hold so the line can land
-      });
-      tl.to(panels[panels.length - 1], {
-        opacity: 0,
-        y: -44,
-        scale: 1.08,
-        duration: 0.32,
-        ease: "power2.in",
-      });
-
-      // Photo parallax: slow drift + gentle zoom through the whole pin.
-      if (photoRef.current && !reduced) {
-        gsap.fromTo(
-          photoRef.current,
-          { yPercent: -8, scale: 1.06 },
-          {
-            yPercent: 8,
-            scale: 1.16,
-            ease: "none",
-            scrollTrigger: {
-              trigger: section,
-              start: "top top",
-              end: () => `+=${pinDistance()}`,
-              scrub: 1,
-            },
-          }
-        );
-      }
+      // Positions depend on images/fonts that settle after mount.
+      ScrollTrigger.refresh();
     }, section);
 
     return () => ctx.revert();
-  }, []);
+  }, [beadDepths]);
 
   return (
     <section
@@ -158,9 +138,7 @@ export function PinnedSection({ photo }: Props) {
       style={{
         position: "relative",
         height: "100svh",
-        // No overflow clipping: the photo backdrop bleeds past the section
-        // and its mask fades it out, so there is never a hard edge.
-        overflow: "visible",
+        overflow: "hidden",
         background: "transparent",
       }}
       onContextMenu={(e) => e.preventDefault()}
@@ -173,8 +151,6 @@ export function PinnedSection({ photo }: Props) {
             position: "absolute",
             inset: "-8% 0",
             zIndex: 0,
-            // Fade the backdrop in and out vertically so the section has no
-            // hard boundary against the shared sky above and below it.
             WebkitMaskImage:
               "linear-gradient(to bottom, transparent 0%, black 18%, black 82%, transparent 100%)",
             maskImage:
@@ -191,7 +167,7 @@ export function PinnedSection({ photo }: Props) {
             blurDataURL={photo.blurDataURL}
             style={{
               objectFit: "cover",
-              opacity: 0.22,
+              opacity: 0.2,
               filter: "saturate(0.85)",
               pointerEvents: "none",
               mixBlendMode: "multiply",
@@ -203,50 +179,80 @@ export function PinnedSection({ photo }: Props) {
               position: "absolute",
               inset: 0,
               background:
-                "radial-gradient(ellipse 70% 60% at 50% 50%, rgba(250,249,246,0.55) 0%, rgba(250,249,246,0.82) 60%, rgba(250,249,246,0.92) 100%)",
+                "radial-gradient(ellipse 70% 60% at 50% 50%, rgba(250,249,246,0.55) 0%, rgba(250,249,246,0.82) 60%, rgba(250,249,246,0.94) 100%)",
             }}
           />
         </div>
       )}
 
-      {/* Stacked panels — GSAP writes each statement in, then lets it go */}
+      {/* 3D corridor */}
       <div
+        className="pp-scene"
         style={{
           position: "absolute",
           inset: 0,
           zIndex: 5,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          padding: "0 24px",
+          perspective: "820px",
+          perspectiveOrigin: "50% 46%",
         }}
       >
-        {PANELS.map((p, i) => (
-          <div
-            key={i}
-            className="pinned-panel"
-            style={{
-              position: "absolute",
-              maxWidth: 980,
-              textAlign: "center",
-              opacity: 0,
-              willChange: "transform, opacity",
-            }}
-          >
+        <div
+          ref={cameraRef}
+          className="pp-camera"
+          style={{
+            position: "absolute",
+            inset: 0,
+            transformStyle: "preserve-3d",
+            willChange: "transform",
+          }}
+        >
+          {/* Thread of lights receding into the corridor */}
+          {beadDepths.map((z, i) => (
             <span
-              className="hero-eyebrow pinned-eyebrow"
-              style={{ display: "block", marginBottom: 28 }}
+              key={`bead-${i}`}
+              ref={(el) => {
+                beadRefs.current[i] = el;
+              }}
+              className="pp-bead"
+              style={{ transform: `translate(-50%, -50%) translateZ(${(-z).toFixed(1)}px)` }}
+              aria-hidden
+            />
+          ))}
+
+          {/* Statements at increasing depth */}
+          {PANELS.map((p, i) => (
+            <div
+              key={i}
+              ref={(el) => {
+                panelRefs.current[i] = el;
+              }}
+              className="pinned-panel pp-panel"
+              style={{
+                transform: `translate(-50%, -50%) translateZ(${(-i * GAP).toFixed(1)}px)`,
+                opacity: i === 0 ? 1 : 0,
+              }}
             >
-              {p.eyebrow}
-            </span>
-            <h2 className="pinned-statement">
-              <Chars text={p.lead} />{" "}
-              <em>
-                <Chars text={p.emph} />
-              </em>
-            </h2>
-          </div>
-        ))}
+              <span className="hero-eyebrow pinned-eyebrow" style={{ display: "block", marginBottom: 22 }}>
+                {p.eyebrow}
+              </span>
+              <h2 className="pinned-statement">
+                {p.lead} <em>{p.emph}</em>
+              </h2>
+            </div>
+          ))}
+        </div>
+
+        {/* A soft foreground haze so beads dissolve as they reach you */}
+        <div
+          aria-hidden
+          style={{
+            position: "absolute",
+            inset: 0,
+            pointerEvents: "none",
+            background:
+              "radial-gradient(ellipse 60% 60% at 50% 46%, transparent 58%, rgba(250,249,246,0.5) 100%)",
+          }}
+        />
       </div>
     </section>
   );

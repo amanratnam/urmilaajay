@@ -312,6 +312,26 @@ img {
 }
 .hero-message em { font-style: normal; }
 .hero-message em.it { font-style: italic; }
+
+/* ─── Written remembrance (obituary prose, proximity-reactive) ────── */
+.hero-obit {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(16px, 1.35vw, 21px);
+  line-height: 1.66;
+  color: var(--fg-soft);
+  max-width: 46ch;
+  margin: 0;
+  text-wrap: balance;
+}
+.hero-obit-em {
+  font-style: italic;
+  color: var(--accent);
+}
+@media (max-width: 768px) {
+  .hero-obit { max-width: none; font-size: 17px; line-height: 1.6; }
+}
+
 .hero-sign {
   /* Copperplate signature, as if signed at the foot of a letter */
   font-family: var(--font-script);
@@ -398,6 +418,32 @@ img {
   font-style: italic;
   font-weight: 600;
   color: var(--accent);
+}
+
+/* ─── Pinned 3D corridor (statements strung along a thread of light) ── */
+.pp-panel {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: min(90vw, 900px);
+  text-align: center;
+  will-change: transform, opacity, filter;
+  backface-visibility: hidden;
+}
+.pp-bead {
+  position: absolute;
+  top: 46%;
+  left: 50%;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #E0BE82 0%, #C9A878 45%, rgba(201,168,120,0) 72%);
+  box-shadow: 0 0 8px rgba(201, 168, 120, 0.7);
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+}
+@media (max-width: 768px) {
+  .pp-bead { width: 5px; height: 5px; }
 }
 
 /* ─── Scroll progress hairline ───────────────────────────────────── */
@@ -536,6 +582,82 @@ img {
   inset: 0;
   overflow: hidden;
   animation: photoBreathe 9s ease-in-out infinite;
+}
+
+/* ─── Levitating portrait (the lifted vintage frame) ─────────────── */
+@keyframes vintageLevitate {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50%      { transform: translateY(-8px) rotate(0.4deg); }
+}
+.vintage-levitate {
+  animation: vintageLevitate 5.5s ease-in-out infinite;
+}
+
+/* ─── Postcards of memory (the gallery memory wall) ──────────────── */
+.postcard {
+  position: relative;
+  flex: 0 0 auto;
+  width: min(78vw, 248px);
+  background: linear-gradient(180deg, #FFFDF7 0%, #FBF5EA 100%);
+  border: 1px solid rgba(139, 110, 63, 0.18);
+  border-radius: 3px;
+  padding: 22px 18px 16px;
+  box-shadow: 0 14px 34px rgba(15, 10, 4, 0.4);
+  transform-origin: top center;
+}
+.postcard-pin {
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  width: 11px;
+  height: 11px;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #D9BC85, #8B6E3F);
+  box-shadow: 0 2px 4px rgba(15, 10, 4, 0.45);
+}
+.postcard-body {
+  margin: 0;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 400;
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--fg-soft);
+  white-space: pre-wrap;
+}
+.postcard-author {
+  display: block;
+  margin-top: 10px;
+  font-family: var(--font-body);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.wall-btn {
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  padding: 13px 24px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: transform 200ms var(--ease-memorial), background 200ms var(--ease-memorial);
+}
+.wall-btn:active { transform: scale(0.96); }
+.wall-btn-primary {
+  background: var(--accent);
+  border: 1px solid var(--accent);
+  color: #FBF4E6;
+}
+.wall-btn-ghost {
+  background: transparent;
+  border: 1px solid rgba(217, 188, 133, 0.5);
+  color: #EBDFC7;
 }
 
 /* ─── Reduced motion ─────────────────────────────────────────────── */
